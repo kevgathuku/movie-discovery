@@ -7,14 +7,15 @@ from app.schemas.movie import (
     PaginatedMovieResponse,
 )
 from app.schemas.watchlist import (
-    PaginatedWatchlistEntryResponse,
-    WatchlistCreateRequest,
-    WatchlistEntryCreateRequest,
+    PaginatedWatchlistEntriesResponse,
+    WatchlistCreate,
+    WatchlistEntryCreate,
+    WatchlistEntryDetailResponse,
     WatchlistEntryResponse,
-    WatchlistEntryUpdateRequest,
-    WatchlistEntryWithMovieResponse,
+    WatchlistEntryUpdate,
+    WatchlistListResponse,
+    WatchlistRename,
     WatchlistResponse,
-    WatchlistUpdateRequest,
 )
 
 __all__ = [
@@ -23,13 +24,14 @@ __all__ = [
     "MovieImportRequest",
     "MovieListResponse",
     "PaginatedMovieResponse",
-    "WatchlistCreateRequest",
-    "WatchlistEntryCreateRequest",
+    "WatchlistCreate",
+    "WatchlistEntryCreate",
+    "WatchlistEntryDetailResponse",
     "WatchlistEntryResponse",
-    "WatchlistEntryUpdateRequest",
-    "WatchlistEntryWithMovieResponse",
+    "WatchlistEntryUpdate",
+    "WatchlistListResponse",
+    "WatchlistRename",
     "WatchlistResponse",
-    "WatchlistUpdateRequest",
-    "PaginatedWatchlistEntryResponse",
+    "PaginatedWatchlistEntriesResponse",
     "JobResponse",
 ]

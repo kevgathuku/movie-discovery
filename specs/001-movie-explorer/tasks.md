@@ -128,9 +128,9 @@
 
 ### Implementation
 
-- [ ] T034 [US5] Create backend/app/services/watchlist_service.py with create_watchlist(name), list_watchlists(), rename_watchlist(watchlist_id, name), delete_watchlist(watchlist_id), add_to_watchlist(watchlist_id, movie_id), list_watchlist_entries(watchlist_id, status, sort, order, page, per_page), mark_watched(entry_id), remove_from_watchlist(entry_id)
-- [ ] T035 [US5] Create backend/app/api/watchlist.py with watchlists and watchlist entries routes — delegates to WatchlistService, handles 404/409
-- [ ] T035a [US5] Write pytest tests for watchlist_service and API endpoints (backend/tests/unit/test_watchlist_service.py, backend/tests/integration/api/test_watchlist.py)
+- [x] T034 [US5] Create backend/app/services/watchlist_service.py with create_watchlist(name), list_watchlists(), rename_watchlist(watchlist_id, name), delete_watchlist(watchlist_id), add_to_watchlist(watchlist_id, movie_id), list_watchlist_entries(watchlist_id, status, sort, order, page, per_page), mark_watched(entry_id), remove_from_watchlist(entry_id)
+- [x] T035 [US5] Create backend/app/api/watchlist.py with watchlists and watchlist entries routes — delegates to WatchlistService, handles 404/409
+- [x] T035a [US5] Write pytest tests for watchlist_service and API endpoints (backend/tests/unit/test_watchlist_service.py, backend/tests/integration/api/test_watchlist.py)
 
 **Checkpoint**: Full watchlist CRUD works; idempotent add; remove doesn't delete movie
 

@@ -1,4 +1,17 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
+
+from app.models.watchlist import WatchlistStatus
+from app.schemas.movie import MovieListResponse
+
+
+class WatchlistCreate(BaseModel):
+    name: str
+
+
+class WatchlistRename(BaseModel):
+    name: str
 
 
 class WatchlistResponse(BaseModel):
@@ -6,15 +19,15 @@ class WatchlistResponse(BaseModel):
 
     id: int
     name: str
-    created_at: str
+    created_at: datetime
 
 
-class WatchlistCreateRequest(BaseModel):
-    name: str
+class WatchlistListResponse(BaseModel):
+    watchlists: list[WatchlistResponse]
 
 
-class WatchlistUpdateRequest(BaseModel):
-    name: str
+class WatchlistEntryCreate(BaseModel):
+    movie_id: int
 
 
 class WatchlistEntryResponse(BaseModel):
@@ -23,33 +36,29 @@ class WatchlistEntryResponse(BaseModel):
     id: int
     watchlist_id: int
     movie_id: int
-    status: str
-    added_at: str
-    watched_at: str | None = None
+    status: WatchlistStatus
+    added_at: datetime
+    watched_at: datetime | None = None
 
 
-class WatchlistEntryCreateRequest(BaseModel):
-    movie_id: int
-
-
-class WatchlistEntryUpdateRequest(BaseModel):
-    status: str
-
-
-class WatchlistEntryWithMovieResponse(BaseModel):
+class WatchlistEntryDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     watchlist_id: int
     movie_id: int
-    status: str
-    added_at: str
-    watched_at: str | None = None
-    movie: dict | None = None
+    status: WatchlistStatus
+    added_at: datetime
+    watched_at: datetime | None = None
+    movie: MovieListResponse
 
 
-class PaginatedWatchlistEntryResponse(BaseModel):
-    entries: list[WatchlistEntryWithMovieResponse]
+class WatchlistEntryUpdate(BaseModel):
+    status: WatchlistStatus
+
+
+class PaginatedWatchlistEntriesResponse(BaseModel):
+    entries: list[WatchlistEntryDetailResponse]
     total: int
     page: int
     per_page: int

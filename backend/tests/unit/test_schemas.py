@@ -2,9 +2,9 @@ import pytest
 from app.schemas.movie import MovieListResponse, MovieDetailResponse, MovieImportRequest
 from app.schemas.watchlist import (
     WatchlistResponse,
-    WatchlistCreateRequest,
+    WatchlistCreate,
     WatchlistEntryResponse,
-    WatchlistEntryCreateRequest,
+    WatchlistEntryCreate,
 )
 from app.schemas.job import JobResponse
 
@@ -60,7 +60,7 @@ def test_watchlist_response_schema():
 
 
 def test_watchlist_create_request_schema():
-    request = WatchlistCreateRequest(name="Upcoming")
+    request = WatchlistCreate(name="Upcoming")
     assert request.name == "Upcoming"
 
 
@@ -79,7 +79,7 @@ def test_watchlist_entry_response_schema():
 
 
 def test_watchlist_entry_create_request_schema():
-    request = WatchlistEntryCreateRequest(movie_id=1)
+    request = WatchlistEntryCreate(movie_id=1)
     assert request.movie_id == 1
 
 
