@@ -11,6 +11,7 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - Q: Should search check the local database first or TMDB first? → A: Local database first; TMDB is a fallback for missing content.
 - Q: When local search returns no results? → A: User is offered the option to import a movie from TMDB by IMDB ID as a fallback.
 - Q: Should the home page (movie discovery) work offline or require an internet connection? → A: Home page works offline using a local cache of trending/popular movies, kept current by a background service that periodically syncs from TMDB.
+- Q: What primary key types should the entities use? → A: Movie and WatchlistEntry use BIGINT auto-increment. Job uses Sqids-generated short string IDs (sqids.org/python).
 
 ## User Scenarios & Testing
 
