@@ -1,19 +1,22 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 → 1.1.0 (MINOR: new principles added)
+Version change: 1.1.0 → 1.2.0 (MINOR: new principles and sections added)
 Modified principles: None renamed
 Added principles:
-  VI. Persistence Isolation
-  VII. External API Isolation
-  VIII. Asynchronous Work
-  IX. Idempotency
-  X. Reliable Background Jobs
-  XI. Configuration and Secrets
-  XII. Docker as the Development Environment
-  XIII. Database Migrations
-  XIV. API Contracts
-Added sections: None
-Removed sections: Containerized Development (superseded by Principle XII)
+  XV. Testability
+  XVI. Dependency Injection
+  XVII. Simplicity Over Abstraction
+  XVIII. Single Application Boundary
+  XIX. Observability
+  XX. Error Handling
+  XXI. Data Ownership
+  XXII. Incremental Development
+  XXIII. Feature Specifications Must Define Boundaries
+  XXIV. Security Baseline
+  XXV. Performance Principles
+Added sections: Definition of Done, Guiding Principle
+Removed sections: Testing Standards (superseded by Principle XV),
+  Incremental Delivery (superseded by Principle XXII)
 Follow-up TODOs: None
 -->
 
@@ -208,21 +211,160 @@ API request and response contracts MUST be explicitly represented using Pydantic
 
 This allows the persistence model and public API to evolve independently.
 
-## Testing Standards
+### XV. Testability
 
-Business logic MUST be testable in isolation. Tests SHOULD:
+Business logic MUST be testable independently of HTTP. Services SHOULD be testable without starting FastAPI. External API clients MUST be mockable. Tests MUST NOT depend on the availability of the real TMDB service.
 
-- Exercise services without HTTP or framework dependencies
-- Mock external API clients at the integration boundary
-- Verify business rules independently of delivery mechanism
+The test suite should contain separate coverage for:
 
-## Incremental Delivery
+- Services
+- Repositories
+- API endpoints
+- Background tasks
 
-Features SHOULD be delivered incrementally. Each increment MUST:
+Critical business rules MUST have automated tests.
 
-- Maintain existing architectural boundaries
-- Not break previously working functionality
-- Be independently testable and deployable
+### XVI. Dependency Injection
+
+Dependencies such as database sessions, services, repositories, external clients, and configuration SHOULD be injected rather than instantiated throughout application code. FastAPI's dependency injection system should be used at the application boundary.
+
+This enables:
+
+- Easier testing
+- Mocking
+- Explicit dependencies
+- Replacement implementations
+
+### XVII. Simplicity Over Abstraction
+
+The project MUST avoid unnecessary abstraction. Architectural patterns should be introduced when they solve an actual problem. Do not introduce:
+
+- Generic repositories without a demonstrated need
+- Excessive factory patterns
+- Deep inheritance hierarchies
+- Framework-specific abstractions without clear value
+- Premature microservices
+
+Prefer straightforward Python and explicit dependencies. The architecture should be sophisticated enough to demonstrate good engineering practices without becoming an architecture exercise in itself.
+
+### XVIII. Single Application Boundary
+
+The initial project MUST remain a modular monolith. The backend should be deployed as one logical application consisting of:
+
+- API
+- Worker
+- Scheduler
+
+These may run as separate processes or containers but should share the same application domain and codebase. The project MUST NOT introduce microservices unless a concrete requirement demonstrates the need.
+
+### XIX. Observability
+
+Important operations MUST produce useful structured logs. Logs SHOULD contain contextual identifiers where available:
+
+- `request_id`
+- `job_id`
+- `tmdb_id`
+- `task_name`
+
+Errors MUST provide enough context to diagnose failures without exposing secrets. Sensitive credentials MUST NEVER appear in logs.
+
+### XX. Error Handling
+
+Errors MUST be handled at the appropriate architectural boundary. Expected domain errors should use explicit domain exceptions. For example:
+
+- `MovieNotFoundError`
+- `MovieAlreadyExistsError`
+- `JobNotFoundError`
+
+The API layer maps these to appropriate HTTP responses. External API errors should be translated into application-level errors where appropriate. Unexpected errors MUST NOT expose internal implementation details to API clients.
+
+### XXI. Data Ownership
+
+PostgreSQL is the source of truth for data owned by Movie Explorer. TMDB is the source of truth for externally sourced movie metadata. The application MAY cache or normalize TMDB data locally, but MUST distinguish between:
+
+- External movie identity: `tmdb_id`
+- Internal movie identity: `id`
+
+The internal database ID MUST NOT be assumed to correspond to a TMDB ID.
+
+### XXII. Incremental Development
+
+Features MUST be implemented vertically where practical. Each feature should ideally provide a complete path through:
+
+```
+Frontend → API → Service → Repository / External Client → Database / External API
+```
+
+Avoid building large layers of unused infrastructure before implementing functionality that requires them. Each increment should leave the application in a runnable state.
+
+### XXIII. Feature Specifications Must Define Boundaries
+
+Every future feature specification should explicitly identify:
+
+- User-visible behavior
+- API changes
+- Domain/business rules
+- Database changes
+- Background processing requirements
+- External API requirements
+- Frontend changes
+- Testing requirements
+
+A feature should not silently introduce architectural responsibilities into an unrelated layer.
+
+### XXIV. Security Baseline
+
+The application MUST:
+
+- Keep secrets server-side
+- Validate all external and user-provided input
+- Avoid SQL injection through parameterized ORM/database operations
+- Avoid exposing internal errors to clients
+- Avoid logging secrets
+- Validate external API responses before persisting important data
+
+Authentication is intentionally deferred from the MVP but the architecture SHOULD allow it to be added later.
+
+### XXV. Performance Principles
+
+Performance optimizations should be based on actual bottlenecks. The application SHOULD:
+
+- Avoid unnecessary TMDB requests
+- Prefer local PostgreSQL reads for imported movies
+- Use background jobs for expensive synchronization or import operations
+- Paginate potentially large collections
+- Consider caching only where useful
+
+Premature optimization MUST NOT complicate the architecture.
+
+## Definition of Done
+
+A feature is considered complete only when:
+
+- Its functional requirements are implemented
+- Architectural boundaries are respected
+- Required database migrations exist
+- Relevant tests exist
+- Error cases are handled
+- Docker-based development continues to work
+- API contracts are documented through FastAPI and Pydantic
+- External integrations are mockable
+- Background jobs are retry-safe where applicable
+- The frontend handles loading, success, and failure states where applicable
+
+## Guiding Principle
+
+Build a boring, explicit, testable modular monolith with clear boundaries.
+
+Prefer:
+
+- Simple over clever
+- Explicit over implicit
+- Testable over tightly coupled
+- Replaceable over prematurely distributed
+- Observable over over-engineered
+
+The architecture should make the correct path easy and the incorrect path obvious.
 
 ## Governance
 
@@ -236,4 +378,4 @@ Amendments to this constitution MUST:
 
 Compliance reviews SHOULD occur during code review. Architectural boundary violations MUST be justified in writing before merging.
 
-**Version**: 1.1.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02
+**Version**: 1.2.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02
