@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -8,7 +10,7 @@ class JobResponse(BaseModel):
     job_type: str
     status: str
     progress: int | None = None
-    created_at: str
-    started_at: str | None = None
-    completed_at: str | None = None
+    created_at: datetime
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     error_info: dict | None = None
