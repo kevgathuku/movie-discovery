@@ -1,3 +1,4 @@
+import logging
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -18,6 +19,8 @@ from app.schemas.movie import (
 )
 from app.services.import_service import ImportService
 from app.services.movie_service import MovieService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["movies"])
 
@@ -42,6 +45,7 @@ async def list_movies(
 async def get_movie(
     movie_id: int,
     db: AsyncSession = Depends(get_db),
+    tmdb_client: TMDBClient = Depends(get_tmdb_client),
 ):
     service = MovieService(db)
     movie = await service.get_movie_detail(movie_id)
@@ -50,6 +54,21 @@ async def get_movie(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Movie not found",
         )
+
+    if not movie.imdb_id:
+        try:
+            details = await tmdb_client.get_movie_details(movie.tmdb_id)
+            external_ids = details.get("external_ids", {})
+            imdb_id = external_ids.get("imdb_id")
+            if imdb_id:
+                movie.imdb_id = imdb_id
+                await db.commit()
+                await db.refresh(movie)
+        except ExternalAPIError:
+            logger.warning(
+                "Failed to fetch external IDs for movie %d", movie.tmdb_id
+            )
+
     return MovieDetailResponse.model_validate(movie)
 
 

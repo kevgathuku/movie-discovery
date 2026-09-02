@@ -41,7 +41,11 @@ class TMDBClient:
         return data.get("results", [])
 
     async def get_movie_details(self, movie_id: int) -> dict:
-        return await self._request("GET", f"/movie/{movie_id}")
+        return await self._request(
+            "GET",
+            f"/movie/{movie_id}",
+            params={"append_to_response": "external_ids"},
+        )
 
     async def find_by_imdb_id(self, imdb_id: str) -> dict | None:
         data = await self._request(
