@@ -35,24 +35,39 @@ Represents a film with metadata imported from TMDB.
 - `title` must be non-empty
 - `rating` must be between 0 and 10 if present
 
-### WatchlistEntry
+### Watchlist
 
-Represents a user's intent to watch a movie.
+Represents a named collection of movies (e.g., "To Watch", "Watched", "Upcoming").
 
 | Field | Type | Constraints | Notes |
 |-------|------|-------------|-------|
 | `id` | BigInteger | PK, auto-increment | |
+| `name` | String(200) | NOT NULL | User-defined name |
+| `created_at` | DateTime | NOT NULL, default `now()` | |
+
+**Indexes**:
+- `ix_watchlists_name` on `name`
+
+### WatchlistEntry
+
+Represents a movie in a specific watchlist.
+
+| Field | Type | Constraints | Notes |
+|-------|------|-------------|-------|
+| `id` | BigInteger | PK, auto-increment | |
+| `watchlist_id` | BigInteger | FK → `watchlists.id`, NOT NULL, ON DELETE CASCADE | |
 | `movie_id` | BigInteger | FK → `movies.id`, NOT NULL, ON DELETE CASCADE | |
 | `status` | Enum(`to_watch`, `watched`) | NOT NULL, default `to_watch` | |
 | `added_at` | DateTime | NOT NULL, default `now()` | |
 | `watched_at` | DateTime | nullable | Set when status changes to `watched` |
 
 **Indexes**:
+- `ix_watchlist_entries_watchlist_id` on `watchlist_id`
 - `ix_watchlist_entries_movie_id` on `movie_id`
 - `ix_watchlist_entries_status` on `status`
 
 **Unique constraint**:
-- `uq_watchlist_entries_movie_id` on `movie_id` — prevents duplicate watchlist entries (Principle IX: idempotency)
+- `uq_watchlist_entries_watchlist_movie` on `(watchlist_id, movie_id)` — prevents duplicate entries per watchlist (Principle IX: idempotency)
 
 **State transitions**:
 ```
@@ -83,10 +98,11 @@ Tracks background task lifecycle (Principle X: Reliable Background Jobs).
 ## Relationships
 
 ```
+Watchlist 1 ──── N WatchlistEntry
 Movie 1 ──── N WatchlistEntry
-  (one movie can have many watchlist entries — but unique constraint
-   means at most one per movie in single-user setup)
 ```
+
+A watchlist has many entries. A movie can appear in multiple watchlists (via separate entries). Deleting a watchlist cascade-deletes its entries. Deleting a movie cascade-deletes its entries across all watchlists.
 
 No foreign keys between Job and Movie — jobs reference movie data via `tmdb_id` or `movie_id` in their task arguments, not as a database relationship.
 
@@ -110,7 +126,7 @@ class JobStatus(str, enum.Enum):
 
 ## Design Decisions
 
-1. **BIGINT auto-increment PKs for Movie and WatchlistEntry**: Simple, fast, sufficient for single-user application. Sequential IDs are acceptable at this scale.
+1. **BIGINT auto-increment PKs for Movie, Watchlist, and WatchlistEntry**: Simple, fast, sufficient for single-user application. Sequential IDs are acceptable at this scale.
 
 2. **Sqids-generated string PKs for Job**: Short, URL-safe IDs suitable for API exposure. Generated application-side using the `sqids` Python library before insert.
 
@@ -122,4 +138,8 @@ class JobStatus(str, enum.Enum):
 
 6. **Job table for lifecycle tracking**: Satisfies Principle X requirements (job ID, type, progress, timestamps, error info). Celery's built-in result backend supplements this but the Job table is the authoritative source for the API.
 
-7. **ON DELETE CASCADE on watchlist.movie_id**: When a movie is deleted from the local database (spec R15), its watchlist entries are automatically removed (spec acceptance scenario).
+7. **ON DELETE CASCADE on watchlist_entries.watchlist_id**: When a watchlist is deleted, its entries are automatically removed.
+
+8. **ON DELETE CASCADE on watchlist_entries.movie_id**: When a movie is deleted from the local database (spec R15), its watchlist entries are automatically removed across all watchlists.
+
+9. **Unique constraint on (watchlist_id, movie_id)**: Prevents the same movie from being added to the same watchlist twice (Principle IX: idempotency).

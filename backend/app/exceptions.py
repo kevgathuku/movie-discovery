@@ -10,6 +10,12 @@ class MovieAlreadyExistsError(Exception):
         super().__init__(f"Movie already exists with tmdb_id: {tmdb_id}")
 
 
+class WatchlistNotFoundError(Exception):
+    def __init__(self, watchlist_id: int) -> None:
+        self.watchlist_id = watchlist_id
+        super().__init__(f"Watchlist not found: {watchlist_id}")
+
+
 class WatchlistEntryNotFoundError(Exception):
     def __init__(self, entry_id: int) -> None:
         self.entry_id = entry_id
@@ -17,9 +23,10 @@ class WatchlistEntryNotFoundError(Exception):
 
 
 class WatchlistDuplicateError(Exception):
-    def __init__(self, movie_id: int) -> None:
+    def __init__(self, watchlist_id: int, movie_id: int) -> None:
+        self.watchlist_id = watchlist_id
         self.movie_id = movie_id
-        super().__init__(f"Movie already in watchlist: {movie_id}")
+        super().__init__(f"Movie {movie_id} already in watchlist {watchlist_id}")
 
 
 class JobNotFoundError(Exception):

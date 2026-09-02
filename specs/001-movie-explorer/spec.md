@@ -80,23 +80,25 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - R15: Users can remove a movie's metadata from the local database.
 
 **Watchlist Management**
-- R16: Users can add an imported movie to a personal watchlist.
-- R17: Users can view their full watchlist.
-- R18: Users can mark a watchlist entry as "watched".
-- R19: Users can remove a movie from the watchlist without deleting its local database entry.
-- R20: Users can sort or filter their watchlist (e.g., by date added, title, or watched status).
+- R16: Users can create multiple named watchlists (e.g., "To Watch", "Watched", "Upcoming").
+- R17: Users can add an imported movie to a specific watchlist.
+- R18: Users can view all movies in a selected watchlist.
+- R19: Users can mark a watchlist entry as "watched".
+- R20: Users can remove a movie from a watchlist without deleting its local database entry.
+- R21: Users can sort or filter a watchlist (e.g., by date added, title, or watched status).
+- R22: Users can rename or delete a watchlist (entries are removed with the watchlist).
 
 **General**
-- R21: The application provides clear feedback for all user actions (success, error, loading states).
-- R22: The application handles network errors gracefully with user-friendly messages.
+- R23: The application provides clear feedback for all user actions (success, error, loading states).
+- R24: The application handles network errors gracefully with user-friendly messages.
 
 ### Non-Functional Requirements
 
-- R23: Local search results are displayed to the user within 1 second.
-- R24: TMDB fallback import by IMDB ID completes within 3 seconds under normal network conditions.
-- R25: The background sync service keeps trending/popular movie data current (no more than 24 hours stale).
-- R26: The application works in modern web browsers without requiring plugins or special configuration.
-- R27: The user interface is responsive and usable on desktop and tablet screen sizes. *(frontend scope — deferred with skeleton in T042)*
+- R25: Local search results are displayed to the user within 1 second.
+- R26: TMDB fallback import by IMDB ID completes within 3 seconds under normal network conditions.
+- R27: The background sync service keeps trending/popular movie data current (no more than 24 hours stale).
+- R28: The application works in modern web browsers without requiring plugins or special configuration.
+- R29: The user interface is responsive and usable on desktop and tablet screen sizes. *(frontend scope — deferred with skeleton in T042)*
 
 ## Success Criteria
 
@@ -111,7 +113,8 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 ## Key Entities
 
 - **Movie**: Represents a film with metadata including title, release date, synopsis, genres, rating, poster URL, a unique TMDB identifier, and an IMDB identifier.
-- **Watchlist Entry**: Represents a user's intent to watch a specific movie, with a status (to-watch or watched) and a date added.
+- **Watchlist**: A named collection of movies (e.g., "To Watch", "Watched", "Upcoming"). Users can create multiple watchlists.
+- **Watchlist Entry**: Represents a movie in a specific watchlist, with a status (to-watch or watched) and a date added.
 - **Local Movie Record**: A movie whose metadata has been imported from TMDB and stored locally for offline access and watchlist association.
 
 ## Assumptions

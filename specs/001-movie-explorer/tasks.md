@@ -32,19 +32,19 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 [P] Create backend/app/models/__init__.py, backend/app/models/movie.py with Movie model (BigInteger PK, tmdb_id, imdb_id, title, release_date, synopsis, genres JSON, rating, poster_url, source enum, timestamps, indexes per data-model.md)
-- [ ] T009 [P] Create backend/app/models/watchlist.py with WatchlistEntry model (BigInteger PK, movie_id FK BIGINT ON DELETE CASCADE, status enum, added_at, watched_at, unique constraint on movie_id)
-- [ ] T010 [P] Create backend/app/models/job.py with Job model (String(20) Sqids PK, job_type, status enum, progress, timestamps, error_info JSON, celery_task_id)
-- [ ] T011 Generate initial Alembic migration for all three tables (alembic revision --autogenerate)
-- [ ] T012 [P] Create backend/app/clients/tmdb_client.py with TMDBClient class (httpx.AsyncClient, auth, search, movie details, find by IMDB ID, error handling, retry)
-- [ ] T013 Create backend/app/dependencies.py with FastAPI DI: get_db (async session yield), get_tmdb_client
-- [ ] T014 Create backend/app/main.py with create_app factory, lifespan (engine, http client), CORS, router mounting
-- [ ] T015 [P] Create backend/app/schemas/movie.py with Pydantic schemas (MovieListResponse, MovieDetailResponse, MovieImportRequest — NO source field per clarification)
-- [ ] T016 [P] Create backend/app/schemas/watchlist.py with Pydantic schemas (WatchlistEntryResponse, WatchlistCreateRequest, WatchlistUpdateRequest)
-- [ ] T017 [P] Create backend/app/schemas/job.py with Pydantic schemas (JobResponse)
-- [ ] T018 [P] Create backend/app/repositories/movie_repo.py with MovieRepository (get_by_id, get_by_tmdb_id, get_by_imdb_id, search by title, list with pagination, create, delete)
-- [ ] T019 [P] Create backend/app/repositories/watchlist_repo.py with WatchlistRepository (list with filters/sort, get_by_id, get_by_movie_id, create, update_status, delete)
-- [ ] T020 [P] Create backend/app/repositories/job_repo.py with JobRepository (get_by_id, create, update_status, generate Sqids ID)
+- [x] T008 [P] Create backend/app/models/__init__.py, backend/app/models/movie.py with Movie model (BigInteger PK, tmdb_id, imdb_id, title, release_date, synopsis, genres JSON, rating, poster_url, source enum, timestamps, indexes per data-model.md)
+- [x] T009 [P] Create backend/app/models/watchlist.py with Watchlist model (BigInteger PK, name, created_at) and WatchlistEntry model (BigInteger PK, watchlist_id FK, movie_id FK ON DELETE CASCADE, status enum, added_at, watched_at, unique constraint on watchlist_id+movie_id)
+- [x] T010 [P] Create backend/app/models/job.py with Job model (String(20) Sqids PK, job_type, status enum, progress, timestamps, error_info JSON, celery_task_id)
+- [ ] T011 Generate initial Alembic migration for all four tables (alembic revision --autogenerate)
+- [x] T012 [P] Create backend/app/clients/tmdb_client.py with TMDBClient class (httpx.AsyncClient, auth, search, movie details, find by IMDB ID, error handling, retry)
+- [x] T013 Create backend/app/dependencies.py with FastAPI DI: get_db (async session yield), get_tmdb_client
+- [x] T014 Create backend/app/main.py with create_app factory, lifespan (engine, http client), CORS, router mounting
+- [x] T015 [P] Create backend/app/schemas/movie.py with Pydantic schemas (MovieListResponse, MovieDetailResponse, MovieImportRequest — NO source field per clarification)
+- [x] T016 [P] Create backend/app/schemas/watchlist.py with Pydantic schemas (WatchlistResponse, WatchlistCreateRequest, WatchlistUpdateRequest, WatchlistEntryResponse, WatchlistEntryCreateRequest, WatchlistEntryUpdateRequest)
+- [x] T017 [P] Create backend/app/schemas/job.py with Pydantic schemas (JobResponse)
+- [x] T018 [P] Create backend/app/repositories/movie_repo.py with MovieRepository (get_by_id, get_by_tmdb_id, get_by_imdb_id, search by title, list with pagination, create, delete)
+- [x] T019 [P] Create backend/app/repositories/watchlist_repo.py with WatchlistRepository (list, get_by_id, create, update_name, delete) and WatchlistEntryRepository (list with filters/sort, get_by_id, get_by_watchlist_and_movie, create, update_status, delete)
+- [x] T020 [P] Create backend/app/repositories/job_repo.py with JobRepository (get_by_id, create, update_status, generate Sqids ID)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -117,14 +117,14 @@
 
 ## Phase 7: User Story 5 — Watchlist Management (Priority: P5)
 
-**Goal**: Users add movies to watchlist, view list, mark as watched, remove entries
+**Goal**: Users create multiple watchlists, add movies to specific watchlists, view lists, mark as watched, remove entries
 
-**Independent Test**: POST/PATCH/DELETE /api/v1/watchlist work; duplicate add returns 409; remove doesn't delete movie
+**Independent Test**: CRUD on /api/v1/watchlists and /api/v1/watchlists/{id}/entries work; duplicate add returns 409; remove doesn't delete movie
 
 ### Implementation
 
-- [ ] T034 [US5] Create backend/app/services/watchlist_service.py with add_to_watchlist(movie_id), list_watchlist(status, sort, order, page, per_page), mark_watched(entry_id), remove_from_watchlist(entry_id)
-- [ ] T035 [US5] Create backend/app/api/watchlist.py with GET/POST/PATCH/DELETE /api/v1/watchlist routes — delegates to WatchlistService, handles 404/409
+- [ ] T034 [US5] Create backend/app/services/watchlist_service.py with create_watchlist(name), list_watchlists(), rename_watchlist(watchlist_id, name), delete_watchlist(watchlist_id), add_to_watchlist(watchlist_id, movie_id), list_watchlist_entries(watchlist_id, status, sort, order, page, per_page), mark_watched(entry_id), remove_from_watchlist(entry_id)
+- [ ] T035 [US5] Create backend/app/api/watchlist.py with watchlists and watchlist entries routes — delegates to WatchlistService, handles 404/409
 
 **Checkpoint**: Full watchlist CRUD works; idempotent add; remove doesn't delete movie
 

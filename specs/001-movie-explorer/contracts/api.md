@@ -188,11 +188,84 @@ Import a movie from TMDB by IMDB ID (fallback when local search returns empty).
 
 ---
 
-## Watchlist
+## Watchlists
 
-### GET /api/v1/watchlist
+### GET /api/v1/watchlists
 
-List all movies in the watchlist.
+List all watchlists.
+
+**Response 200**:
+```json
+{
+  "watchlists": [
+    {
+      "id": 1,
+      "name": "To Watch",
+      "created_at": "2026-09-02T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### POST /api/v1/watchlists
+
+Create a new watchlist.
+
+**Request Body**:
+```json
+{
+  "name": "Upcoming"
+}
+```
+
+**Response 201**:
+```json
+{
+  "id": 2,
+  "name": "Upcoming",
+  "created_at": "2026-09-02T10:00:00Z"
+}
+```
+
+---
+
+### PATCH /api/v1/watchlists/{watchlist_id}
+
+Rename a watchlist.
+
+**Request Body**:
+```json
+{
+  "name": "Must Watch"
+}
+```
+
+**Response 200**:
+```json
+{
+  "id": 1,
+  "name": "Must Watch",
+  "created_at": "2026-09-02T10:00:00Z"
+}
+```
+
+---
+
+### DELETE /api/v1/watchlists/{watchlist_id}
+
+Delete a watchlist and all its entries.
+
+**Response 204**: No content
+
+---
+
+## Watchlist Entries
+
+### GET /api/v1/watchlists/{watchlist_id}/entries
+
+List all movies in a specific watchlist.
 
 **Query Parameters**:
 | Parameter | Type | Default | Notes |
@@ -209,6 +282,7 @@ List all movies in the watchlist.
   "entries": [
     {
       "id": 1,
+      "watchlist_id": 1,
       "movie_id": 1,
       "status": "to_watch",
       "added_at": "2026-09-02T10:00:00Z",
@@ -230,9 +304,9 @@ List all movies in the watchlist.
 
 ---
 
-### POST /api/v1/watchlist
+### POST /api/v1/watchlists/{watchlist_id}/entries
 
-Add a movie to the watchlist.
+Add a movie to a specific watchlist.
 
 **Request Body**:
 ```json
@@ -245,6 +319,7 @@ Add a movie to the watchlist.
 ```json
 {
   "id": 1,
+  "watchlist_id": 1,
   "movie_id": 1,
   "status": "to_watch",
   "added_at": "2026-09-02T10:00:00Z",
@@ -255,13 +330,13 @@ Add a movie to the watchlist.
 **Response 409**:
 ```json
 {
-  "detail": "Movie is already in the watchlist"
+  "detail": "Movie is already in this watchlist"
 }
 ```
 
 ---
 
-### PATCH /api/v1/watchlist/{entry_id}
+### PATCH /api/v1/watchlists/{watchlist_id}/entries/{entry_id}
 
 Update a watchlist entry (mark as watched).
 
@@ -276,6 +351,7 @@ Update a watchlist entry (mark as watched).
 ```json
 {
   "id": 1,
+  "watchlist_id": 1,
   "movie_id": 1,
   "status": "watched",
   "added_at": "2026-09-02T10:00:00Z",
@@ -285,7 +361,7 @@ Update a watchlist entry (mark as watched).
 
 ---
 
-### DELETE /api/v1/watchlist/{entry_id}
+### DELETE /api/v1/watchlists/{watchlist_id}/entries/{entry_id}
 
 Remove a movie from the watchlist (does not delete the movie from local database).
 
@@ -331,6 +407,7 @@ The API layer maps domain exceptions (Principle XX) to HTTP status codes:
 |-----------------|-------------|
 | `MovieNotFoundError` | 404 |
 | `MovieAlreadyExistsError` | 409 |
+| `WatchlistNotFoundError` | 404 |
 | `WatchlistEntryNotFoundError` | 404 |
 | `WatchlistDuplicateError` | 409 |
 | `JobNotFoundError` | 404 |
