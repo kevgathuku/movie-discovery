@@ -96,9 +96,9 @@
 
 ### Implementation
 
-- [ ] T030 [US3] Create backend/app/services/import_service.py with import_movie_by_imdb(imdb_id) — calls TMDBClient.find_by_imdb_id, checks uniqueness (tmdb_id), creates Movie record, returns movie
-- [ ] T031 [US3] Add POST /api/v1/movies/import route to backend/app/api/movies.py — validates IMDB ID format, delegates to ImportService, handles 409/404/502
-- [ ] T031a [US3] Write pytest tests for import_service and API endpoint (backend/tests/unit/test_import_service.py, backend/tests/integration/api/test_import.py)
+- [x] T030 [US3] Create backend/app/services/import_service.py with import_movie_by_imdb(imdb_id) — calls TMDBClient.find_by_imdb_id, checks uniqueness (tmdb_id), creates Movie record, returns movie
+- [x] T031 [US3] Add POST /api/v1/movies/import route to backend/app/api/movies.py — validates IMDB ID format, delegates to ImportService, handles 409/404/502
+- [x] T031a [US3] Write pytest tests for import_service and API endpoint (backend/tests/unit/test_import_service.py, backend/tests/integration/api/test_import.py)
 
 **Checkpoint**: IMDB ID import works; duplicate and error cases handled
 
