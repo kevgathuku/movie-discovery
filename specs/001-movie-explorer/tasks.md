@@ -59,14 +59,14 @@
 
 ### Implementation
 
-- [ ] T021 [US1] Create backend/app/services/movie_service.py with list_movies(page, per_page) — queries local DB, returns paginated results
-- [ ] T022 [US1] Create backend/app/services/sync_service.py with sync_trending() — fetches popular movies from TMDB /movie/popular, upserts into local DB (idempotent per Principle IX), creates Job record
-- [ ] T023 [US1] Create backend/app/api/movies.py with GET /api/v1/movies route — delegates to MovieService, returns MovieListResponse
-- [ ] T024 [US1] Create backend/app/tasks/sync_tasks.py with sync_trending_movies Celery task — calls SyncService.sync_trending, updates Job lifecycle
-- [ ] T025 [US1] Configure Celery app in backend/app/tasks/__init__.py with Redis broker, beat schedule (every 6 hours), JSON serialization *(T024 depends on this — not parallel)*
-- [ ] T026 [US1] Create backend/app/schemas/__init__.py re-exporting all schemas
-- [ ] T027 [US1] Create backend/app/api/__init__.py registering movies router on /api/v1
-- [ ] T027a [US1] Write pytest tests for movie_service, sync_service, and API endpoints (backend/tests/unit/test_movie_service.py, backend/tests/integration/api/test_movies.py)
+- [x] T021 [US1] Create backend/app/services/movie_service.py with list_movies(page, per_page) — queries local DB, returns paginated results
+- [x] T022 [US1] Create backend/app/services/sync_service.py with sync_trending() — fetches popular movies from TMDB /movie/popular, upserts into local DB (idempotent per Principle IX), creates Job record
+- [x] T023 [US1] Create backend/app/api/movies.py with GET /api/v1/movies route — delegates to MovieService, returns MovieListResponse
+- [x] T024 [US1] Create backend/app/tasks/sync_tasks.py with sync_trending_movies Celery task — calls SyncService.sync_trending, updates Job lifecycle
+- [x] T025 [US1] Configure Celery app in backend/app/tasks/__init__.py with Redis broker, beat schedule (every 6 hours), JSON serialization *(T024 depends on this — not parallel)*
+- [x] T026 [US1] Create backend/app/schemas/__init__.py re-exporting all schemas
+- [x] T027 [US1] Create backend/app/api/__init__.py registering movies router on /api/v1
+- [x] T027a [US1] Write pytest tests for movie_service, sync_service, and API endpoints (backend/tests/unit/test_movie_service.py, backend/tests/integration/api/test_movies.py)
 
 **Checkpoint**: Home page shows trending movies; background sync keeps data current
 
