@@ -38,9 +38,19 @@ async def list_movies(
     )
 
 
-@router.get("/movies/{movie_id}")
-async def get_movie(movie_id: int):
-    return {"detail": "Not implemented yet"}
+@router.get("/movies/{movie_id}", response_model=MovieDetailResponse)
+async def get_movie(
+    movie_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    service = MovieService(db)
+    movie = await service.get_movie_detail(movie_id)
+    if not movie:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Movie not found",
+        )
+    return MovieDetailResponse.model_validate(movie)
 
 
 @router.delete("/movies/{movie_id}")

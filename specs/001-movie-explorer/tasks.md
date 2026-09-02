@@ -112,9 +112,9 @@
 
 ### Implementation
 
-- [ ] T032 [US4] Add get_movie_detail(movie_id) to backend/app/services/movie_service.py — returns full movie metadata
-- [ ] T033 [US4] Add GET /api/v1/movies/{movie_id} route to backend/app/api/movies.py — returns MovieDetailResponse, handles 404
-- [ ] T033a [US4] Write pytest tests for movie detail endpoint (backend/tests/integration/api/test_movie_detail.py)
+- [x] T032 [US4] Add get_movie_detail(movie_id) to backend/app/services/movie_service.py — returns full movie metadata
+- [x] T033 [US4] Add GET /api/v1/movies/{movie_id} route to backend/app/api/movies.py — returns MovieDetailResponse, handles 404
+- [x] T033a [US4] Write pytest tests for movie detail endpoint (backend/tests/integration/api/test_movie_detail.py)
 
 **Checkpoint**: Movie detail view shows all metadata
 
