@@ -40,7 +40,7 @@ The API is available at `http://localhost:8000`. Interactive docs at `http://loc
 ### Trigger Initial Data Sync
 
 ```bash
-docker compose exec worker uv run celery -A app.tasks call app.tasks.sync_tasks.sync_trending_movies
+docker compose exec worker uv run celery -A app.tasks call app.tasks.tasks.sync_trending_movies
 ```
 
 This fetches trending movies from TMDB into the local database. The scheduler also runs this automatically every 6 hours.

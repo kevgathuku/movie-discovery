@@ -1,14 +1,12 @@
 import pytest
 
 
-@pytest.mark.anyio
 async def test_health_endpoint(client):
     response = await client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
-@pytest.mark.anyio
 async def test_list_movies_empty(client):
     response = await client.get("/api/v1/movies")
     assert response.status_code == 200
@@ -17,7 +15,6 @@ async def test_list_movies_empty(client):
     assert data["total"] == 0
 
 
-@pytest.mark.anyio
 async def test_search_movies_empty(client):
     response = await client.get("/api/v1/search", params={"q": "test"})
     assert response.status_code == 200
@@ -25,7 +22,6 @@ async def test_search_movies_empty(client):
     assert data["results"] == []
 
 
-@pytest.mark.anyio
 async def test_list_watchlists_empty(client):
     response = await client.get("/api/v1/watchlists")
     assert response.status_code == 200
@@ -33,7 +29,6 @@ async def test_list_watchlists_empty(client):
     assert data["watchlists"] == []
 
 
-@pytest.mark.anyio
 async def test_get_job_not_found(client):
     response = await client.get("/api/v1/jobs/nonexistent")
     assert response.status_code == 200
