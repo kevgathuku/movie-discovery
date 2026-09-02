@@ -16,13 +16,13 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend project structure per implementation plan (backend/app/, backend/tests/, backend/alembic/)
-- [ ] T002 Initialize Python project with pyproject.toml and dependencies (fastapi, pydantic, sqlalchemy, alembic, httpx, celery, redis, sqids, uvicorn)
-- [ ] T003 [P] Create backend/app/config.py with pydantic-settings Settings class (TMDB_API_KEY, DATABASE_URL, REDIS_URL from env vars)
-- [ ] T004 [P] Create backend/app/exceptions.py with domain exceptions (MovieNotFoundError, MovieAlreadyExistsError, WatchlistEntryNotFoundError, WatchlistDuplicateError, JobNotFoundError, ExternalAPIError)
-- [ ] T005 [P] Create docker-compose.yml with services: api, worker, scheduler, postgres, redis
-- [ ] T006 [P] Create backend/Dockerfile for API/worker/scheduler
-- [ ] T007 Create backend/alembic.ini and backend/alembic/env.py configured for async SQLAlchemy
+- [x] T001 Create backend project structure per implementation plan (backend/app/, backend/tests/, backend/alembic/)
+- [x] T002 Initialize Python project with pyproject.toml and dependencies (fastapi, pydantic, sqlalchemy, alembic, httpx, celery, redis, sqids, uvicorn)
+- [x] T003 [P] Create backend/app/config.py with pydantic-settings Settings class (TMDB_API_KEY, DATABASE_URL, REDIS_URL from env vars)
+- [x] T004 [P] Create backend/app/exceptions.py with domain exceptions (MovieNotFoundError, MovieAlreadyExistsError, WatchlistEntryNotFoundError, WatchlistDuplicateError, JobNotFoundError, ExternalAPIError)
+- [x] T005 [P] Create docker-compose.yml with services: api, worker, scheduler, postgres, redis
+- [x] T006 [P] Create backend/Dockerfile for API/worker/scheduler
+- [x] T007 Create backend/alembic.ini and backend/alembic/env.py configured for async SQLAlchemy
 
 ---
 
