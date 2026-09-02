@@ -5,7 +5,7 @@ from celery import shared_task
 logger = logging.getLogger(__name__)
 
 
-@shared_task(name="app.tasks.sync_tasks.sync_trending_movies")
+@shared_task(name="app.tasks.tasks.sync_trending_movies")
 def sync_trending_movies() -> str:
     import asyncio
 

@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,10 +31,13 @@ class SyncService:
             if existing:
                 continue
 
+            raw_date = item.get("release_date")
+            parsed_date = date.fromisoformat(raw_date) if raw_date else None
+
             movie = Movie(
                 tmdb_id=tmdb_id,
                 title=item.get("title", ""),
-                release_date=item.get("release_date"),
+                release_date=parsed_date,
                 synopsis=item.get("overview"),
                 genres=None,
                 rating=item.get("vote_average"),

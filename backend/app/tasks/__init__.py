@@ -16,7 +16,7 @@ celery_app.conf.update(
     enable_utc=True,
     beat_schedule={
         "sync-trending-every-6-hours": {
-            "task": "app.tasks.sync_tasks.sync_trending_movies",
+            "task": "app.tasks.tasks.sync_trending_movies",
             "schedule": 21600.0,
         },
     },
