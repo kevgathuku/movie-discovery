@@ -48,8 +48,8 @@
 
 ---
 
-## 2026-09-02: Remove User Story 6 (Delete Movie) from scope
+## 2026-09-02: Remove User Story 7 (Job Status Tracking) from scope
 
-**Decision**: Remove the ability to delete movies from the local database. Movies persist once imported.
+**Decision**: Remove the job status tracking API and service from scope. Background sync runs via Celery scheduler without public API polling.
 
-**Reason**: Simplifies the data model and avoids cascade-delete complexity. In a single-user app with a small local database, storage is not a concern. Removing this feature reduces scope and eliminates potential data loss risks.
+**Reason**: Simplifies the API surface and eliminates unnecessary job state tracking endpoints for MVP.

@@ -152,19 +152,15 @@
 
 ---
 
-## Phase 9: User Story 7 — Job Status Tracking (Priority: P7)
+## Phase 9: User Story 7 — ~~Job Status Tracking~~ (REMOVED FROM SCOPE)
 
-**Goal**: Users check background job status (trending sync, import)
-
-**Independent Test**: GET /api/v1/jobs/{job_id} returns current job state
+> **Note**: Job status tracking was removed from scope.
 
 ### Implementation
 
-- [ ] T038 [US7] Create backend/app/services/job_service.py with get_job(job_id) — returns job status, progress, timestamps
-- [ ] T039 [US7] Create backend/app/api/jobs.py with GET /api/v1/jobs/{job_id} route — returns JobResponse, handles 404
-- [ ] T039a [US7] Write pytest tests for job_service and API endpoint (backend/tests/unit/test_job_service.py, backend/tests/integration/api/test_jobs.py)
-
-**Checkpoint**: Job status polling works
+- ~~T038 [US7] Create backend/app/services/job_service.py~~
+- ~~T039 [US7] Create backend/app/api/jobs.py~~
+- ~~T039a [US7] Write pytest tests~~
 
 ---
 
