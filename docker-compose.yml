@@ -29,7 +29,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     environment:
@@ -48,7 +48,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A app.tasks worker --loglevel=info
+    command: uv run celery -A app.tasks worker --loglevel=info
     environment:
       TMDB_API_KEY: ${TMDB_API_KEY}
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/moviediscovery
@@ -65,7 +65,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A app.tasks beat --loglevel=info
+    command: uv run celery -A app.tasks beat --loglevel=info
     environment:
       TMDB_API_KEY: ${TMDB_API_KEY}
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/moviediscovery
