@@ -168,11 +168,11 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T040 Add structured logging with request_id, job_id, tmdb_id context (Principle XIX)
-- [ ] T041 Add global exception handler in backend/app/main.py mapping domain exceptions to HTTP responses (Principle XX)
-- [ ] T042 Create frontend/ project skeleton (package.json, Dockerfile, placeholder components)
-- [ ] T043 Run quickstart.md validation scenarios end-to-end
-- [ ] T044 Final review: verify all constitution principles are respected
+- [x] T040 Add structured logging with request_id, job_id, tmdb_id context (Principle XIX)
+- [x] T041 Add global exception handler in backend/app/main.py mapping domain exceptions to HTTP responses (Principle XX)
+- [x] T042 Create frontend/ project skeleton (package.json, Dockerfile, placeholder components)
+- [x] T043 Run quickstart.md validation scenarios end-to-end
+- [x] T044 Final review: verify all constitution principles are respected
 
 ---
 
