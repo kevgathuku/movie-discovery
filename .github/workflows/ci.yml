@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: moviediscovery
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -29,8 +29,6 @@ jobs:
         working-directory: backend
     env:
       TMDB_API_KEY: test-api-key
-      TEST_DATABASE_URL: ******localhost:5432/moviediscovery_test
-      ADMIN_DATABASE_URL: ******localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
