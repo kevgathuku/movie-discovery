@@ -91,7 +91,7 @@ async def import_movie(
 
     if not re.match(r"^tt\d{7,}$", imdb_id):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid IMDB ID format: {imdb_id}. Must be like tt0137566",
         )
 
