@@ -1,8 +1,19 @@
 <!--
 Sync Impact Report
-Version change: N/A → 1.0.0 (initial ratification)
-Added sections: All (initial constitution)
-Removed sections: None
+Version change: 1.0.0 → 1.1.0 (MINOR: new principles added)
+Modified principles: None renamed
+Added principles:
+  VI. Persistence Isolation
+  VII. External API Isolation
+  VIII. Asynchronous Work
+  IX. Idempotency
+  X. Reliable Background Jobs
+  XI. Configuration and Secrets
+  XII. Docker as the Development Environment
+  XIII. Database Migrations
+  XIV. API Contracts
+Added sections: None
+Removed sections: Containerized Development (superseded by Principle XII)
 Follow-up TODOs: None
 -->
 
@@ -78,6 +89,125 @@ Long-running or background operations MUST be processed through a task queue and
 - Business logic is testable independently of the execution model
 - Failed tasks can be retried without user intervention
 
+### VI. Persistence Isolation
+
+Database access MUST be isolated behind repositories. Repositories are responsible for:
+
+- Queries
+- Inserts
+- Updates
+- Deletes
+- Database-specific persistence operations
+
+Repositories MUST NOT:
+
+- Call external APIs
+- Contain HTTP concerns
+- Enqueue background jobs
+- Implement application workflows
+
+Services should depend on repository abstractions rather than embedding SQLAlchemy queries throughout business logic.
+
+### VII. External API Isolation
+
+All communication with TMDB MUST occur through a dedicated client. Application code MUST NOT construct TMDB HTTP requests directly outside the TMDB client.
+
+The TMDB client is responsible for:
+
+- Authentication
+- HTTP requests
+- URL construction
+- Request parameters
+- HTTP error handling
+- Response parsing
+
+The rest of the application should operate on application-level data rather than raw TMDB HTTP responses wherever practical. This allows TMDB to be replaced or mocked without rewriting business logic.
+
+### VIII. Asynchronous Work
+
+Operations that are slow, externally dependent, or potentially long-running MUST NOT block API requests. Background processing MUST use a task queue and worker architecture.
+
+The API should:
+
+```
+Create Job → Enqueue Task → Return Job ID
+```
+
+The worker should:
+
+```
+Receive Task → Execute Service → Update Job State
+```
+
+Background tasks MUST delegate business logic to services rather than becoming a second location for business rules.
+
+### IX. Idempotency
+
+Operations that may be retried MUST be designed to be idempotent wherever practical. In particular:
+
+- Movie imports MUST NOT create duplicate movies
+- Trending synchronization MUST safely handle repeated execution
+- Background tasks MUST tolerate retries
+- Watchlist additions MUST NOT create duplicate entries
+
+Database constraints SHOULD enforce important uniqueness guarantees rather than relying exclusively on application checks.
+
+### X. Reliable Background Jobs
+
+Background jobs MUST explicitly track their lifecycle. At minimum, jobs must transition through these states:
+
+- `queued`
+- `processing`
+- `completed`
+- `failed`
+
+Jobs SHOULD record:
+
+- Job ID
+- Job type
+- Progress
+- Creation time
+- Start time
+- Completion time
+- Error information
+
+Transient external failures SHOULD be retried. Permanent failures MUST transition the job to `failed` and provide useful diagnostic information. A failed job MUST NOT leave the application in an ambiguous state.
+
+### XI. Configuration and Secrets
+
+Configuration MUST be supplied through environment variables or an equivalent configuration mechanism. Secrets MUST NOT be committed to source control. In particular, the following MUST be configurable independently of application code:
+
+- `TMDB_API_KEY`
+- `DATABASE_URL`
+- `REDIS_URL`
+
+The TMDB API key MUST NEVER be exposed to the frontend.
+
+### XII. Docker as the Development Environment
+
+The complete application MUST be runnable using Docker Compose. The development environment MUST include separate services for:
+
+- `frontend`
+- `api`
+- `worker`
+- `scheduler`
+- `postgres`
+- `redis`
+
+Services MUST communicate using Docker service names rather than relying on `localhost` for inter-container communication. A developer should be able to start the application with `docker compose up` where practical. The application should minimize differences between the development and production runtime environments.
+
+### XIII. Database Migrations
+
+Database schema evolution MUST use Alembic migrations. The project MUST NOT rely on `Base.metadata.create_all()` as the primary mechanism for managing schema changes. Every schema change that affects persisted data should have a corresponding migration. Migrations MUST be reviewable and reproducible.
+
+### XIV. API Contracts
+
+API request and response contracts MUST be explicitly represented using Pydantic schemas. Database models MUST NOT automatically become the public API contract. The application SHOULD maintain separate:
+
+- Database Models ≠ API Schemas
+
+This allows the persistence model and public API to evolve independently.
+
 ## Testing Standards
 
 Business logic MUST be testable in isolation. Tests SHOULD:
@@ -85,14 +215,6 @@ Business logic MUST be testable in isolation. Tests SHOULD:
 - Exercise services without HTTP or framework dependencies
 - Mock external API clients at the integration boundary
 - Verify business rules independently of delivery mechanism
-
-## Containerized Development
-
-The development environment MUST be containerized to ensure consistency across machines and contributors. The container setup SHOULD:
-
-- Match production runtime dependencies
-- Support hot-reload for development
-- Be documented and reproducible
 
 ## Incremental Delivery
 
@@ -114,4 +236,4 @@ Amendments to this constitution MUST:
 
 Compliance reviews SHOULD occur during code review. Architectural boundary violations MUST be justified in writing before merging.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02
+**Version**: 1.1.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-09-02
