@@ -136,19 +136,19 @@
 
 ---
 
-## Phase 8: User Story 6 — Remove Movie from Local Database (Priority: P6)
+## Phase 8: User Story 6 — ~~Remove Movie from Local Database~~ (REMOVED FROM SCOPE)
 
-**Goal**: Users delete a movie's metadata; associated watchlist entries cascade-delete
+> **Note**: Movie deletion was removed from scope. Movies persist once imported. This phase is intentionally left unimplemented.
 
-**Independent Test**: DELETE /api/v1/movies/{id} returns 204; movie and watchlist entry removed
+~~**Goal**: Users delete a movie's metadata; associated watchlist entries cascade-delete~~
+
+~~**Independent Test**: DELETE /api/v1/movies/{id} returns 204; movie and watchlist entry removed~~
 
 ### Implementation
 
-- [ ] T036 [US6] Add delete_movie(movie_id) to backend/app/services/movie_service.py — deletes movie (watchlist cascade via FK), handles not found
-- [ ] T037 [US6] Add DELETE /api/v1/movies/{movie_id} route to backend/app/api/movies.py — returns 204, handles 404
-- [ ] T037a [US6] Write pytest tests for movie deletion with cascade (backend/tests/integration/api/test_movie_delete.py)
-
-**Checkpoint**: Movie deletion works with cascade
+- ~~T036 [US6] Add delete_movie(movie_id) to backend/app/services/movie_service.py~~
+- ~~T037 [US6] Add DELETE /api/v1/movies/{movie_id} route~~
+- ~~T037a [US6] Write pytest tests~~
 
 ---
 

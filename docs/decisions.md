@@ -45,3 +45,11 @@
 **Decision**: Rename `sync_tasks.py` to `tasks.py` for Celery autodiscovery.
 
 **Reason**: Celery's `autodiscover_tasks` looks for a `tasks.py` file by default. Renaming avoids manual task registration and follows the convention.
+
+---
+
+## 2026-09-02: Remove User Story 6 (Delete Movie) from scope
+
+**Decision**: Remove the ability to delete movies from the local database. Movies persist once imported.
+
+**Reason**: Simplifies the data model and avoids cascade-delete complexity. In a single-user app with a small local database, storage is not a concern. Removing this feature reduces scope and eliminates potential data loss risks.

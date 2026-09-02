@@ -29,8 +29,6 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 
 6. **Manage Watchlist**: A user views their watchlist, marks movies as watched, removes movies, and sorts/filters the list.
 
-7. **Remove Movie from Local Database**: A user removes a movie's metadata from the local database when it is no longer needed.
-
 ### Acceptance Scenarios
 
 - **Given** a user is on the home page, **When** they load the page, **Then** they see a display of popular/trending movies.
@@ -41,7 +39,6 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - **Given** a user has imported movies, **When** they click "Add to Watchlist", **Then** the movie appears in their watchlist.
 - **Given** a user is on their watchlist page, **When** they mark a movie as watched, **Then** the movie's status updates to "watched" and remains visible in the list.
 - **Given** a user is on their watchlist page, **When** they remove a movie, **Then** the movie is removed from the watchlist but its metadata remains in the local database.
-- **Given** a user has imported movies, **When** they choose to remove a movie from the local database, **Then** the movie and its associated watchlist entry are deleted.
 
 ### Edge Cases
 
@@ -77,7 +74,6 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - R12: Users can import a movie's full metadata from TMDB into the local database.
 - R13: Imported movies are stored with all relevant metadata fields (title, release date, synopsis, genres, rating, poster URL, TMDB ID, IMDB ID).
 - R14: The application prevents duplicate imports of the same movie (matched by TMDB ID).
-- R15: Users can remove a movie's metadata from the local database.
 
 **Watchlist Management**
 - R16: Users can create multiple named watchlists (e.g., "To Watch", "Watched", "Upcoming").
@@ -138,7 +134,6 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - Movie detail view
 - Individual movie metadata import to local database
 - Personal watchlist (add, remove, mark as watched, sort/filter)
-- Removal of movie metadata from local database
 - Error handling for API failures and network issues
 
 ### Out of Scope
@@ -151,3 +146,4 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - Mobile native applications
 - Bulk import of movies
 - Cross-device watchlist synchronization
+- Removal of movie metadata from local database (movies persist once imported)
