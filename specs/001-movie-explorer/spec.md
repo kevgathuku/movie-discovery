@@ -66,12 +66,12 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - R5: Search queries against the local database return matching movies displaying the poster, title, and release year.
 - R6: When local search returns no results, the user is offered the option to import a movie from TMDB by entering an IMDB ID.
 - R7: Users can import a movie into the local database by providing an IMDB ID, which fetches metadata from TMDB.
-- R8: Search results update as the user types (debounced) or upon pressing Enter.
+- R8: Search results update as the user types (debounced) or upon pressing Enter. *(debounce is frontend responsibility — backend search endpoint is stateless)*
 - R9: The application handles empty search queries gracefully by showing no results.
 
 **Movie Details**
 - R10: Users can select a movie to view detailed metadata including title, release date, synopsis, genres, rating, and cast.
-- R11: Movie details are fetched from TMDB in real time when a user views a movie not yet imported locally.
+- R11: Movie details are fetched from TMDB in real time when a user views a movie not yet imported locally. *(deferred to post-MVP — import flow satisfies core use case)*
 
 **Local Database Import**
 - R12: Users can import a movie's full metadata from TMDB into the local database.
@@ -96,7 +96,7 @@ Movie Explorer is a full-stack web application that allows users to discover mov
 - R24: TMDB fallback import by IMDB ID completes within 3 seconds under normal network conditions.
 - R25: The background sync service keeps trending/popular movie data current (no more than 24 hours stale).
 - R26: The application works in modern web browsers without requiring plugins or special configuration.
-- R27: The user interface is responsive and usable on desktop and tablet screen sizes.
+- R27: The user interface is responsive and usable on desktop and tablet screen sizes. *(frontend scope — deferred with skeleton in T042)*
 
 ## Success Criteria
 
