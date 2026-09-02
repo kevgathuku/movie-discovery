@@ -80,9 +80,9 @@
 
 ### Implementation
 
-- [ ] T028 [US2] Create backend/app/services/search_service.py with search_movies(query, page, per_page) — local DB title search, returns results with suggestion when empty
-- [ ] T029 [US2] Create backend/app/api/search.py with GET /api/v1/search route — validates min 2 chars, delegates to SearchService, returns results or suggestion
-- [ ] T029a [US2] Write pytest tests for search_service and API endpoint (backend/tests/unit/test_search_service.py, backend/tests/integration/api/test_search.py)
+- [x] T028 [US2] Create backend/app/services/search_service.py with search_movies(query, page, per_page) — local DB title search, returns results with suggestion when empty
+- [x] T029 [US2] Create backend/app/api/search.py with GET /api/v1/search route — validates min 2 chars, delegates to SearchService, returns results or suggestion
+- [x] T029a [US2] Write pytest tests for search_service and API endpoint (backend/tests/unit/test_search_service.py, backend/tests/integration/api/test_search.py)
 
 **Checkpoint**: Search returns local results; empty results prompt IMDB import
 

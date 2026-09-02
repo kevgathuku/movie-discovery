@@ -51,3 +51,11 @@ class PaginatedMovieResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class SearchResponse(BaseModel):
+    results: list[MovieListResponse]
+    total: int
+    page: int
+    per_page: int
+    suggestion: str | None = None
