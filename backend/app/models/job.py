@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, Index, Integer, String, func
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models import Base
+from app.models.base import Base
 
 
 class JobStatus(enum.StrEnum):

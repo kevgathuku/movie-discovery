@@ -1,12 +1,7 @@
-from sqlalchemy.orm import DeclarativeBase
-
-from app.models.job import Job, JobStatus
+from app.models.base import Base
 from app.models.movie import Movie, MovieSource
 from app.models.watchlist import Watchlist, WatchlistEntry, WatchlistStatus
-
-
-class Base(DeclarativeBase):
-    pass
+from app.models.job import Job, JobStatus
 
 
 __all__ = [

@@ -45,6 +45,7 @@
 - [x] T018 [P] Create backend/app/repositories/movie_repo.py with MovieRepository (get_by_id, get_by_tmdb_id, get_by_imdb_id, search by title, list with pagination, create, delete)
 - [x] T019 [P] Create backend/app/repositories/watchlist_repo.py with WatchlistRepository (list, get_by_id, create, update_name, delete) and WatchlistEntryRepository (list with filters/sort, get_by_id, get_by_watchlist_and_movie, create, update_status, delete)
 - [x] T020 [P] Create backend/app/repositories/job_repo.py with JobRepository (get_by_id, create, update_status, generate Sqids ID)
+- [x] T020a Write pytest tests for models, schemas, and repositories (backend/tests/unit/test_models.py, backend/tests/unit/test_schemas.py, backend/tests/unit/test_repositories.py)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -65,6 +66,7 @@
 - [ ] T025 [US1] Configure Celery app in backend/app/tasks/__init__.py with Redis broker, beat schedule (every 6 hours), JSON serialization *(T024 depends on this — not parallel)*
 - [ ] T026 [US1] Create backend/app/schemas/__init__.py re-exporting all schemas
 - [ ] T027 [US1] Create backend/app/api/__init__.py registering movies router on /api/v1
+- [ ] T027a [US1] Write pytest tests for movie_service, sync_service, and API endpoints (backend/tests/unit/test_movie_service.py, backend/tests/integration/api/test_movies.py)
 
 **Checkpoint**: Home page shows trending movies; background sync keeps data current
 
@@ -80,6 +82,7 @@
 
 - [ ] T028 [US2] Create backend/app/services/search_service.py with search_movies(query, page, per_page) — local DB title search, returns results with suggestion when empty
 - [ ] T029 [US2] Create backend/app/api/search.py with GET /api/v1/search route — validates min 2 chars, delegates to SearchService, returns results or suggestion
+- [ ] T029a [US2] Write pytest tests for search_service and API endpoint (backend/tests/unit/test_search_service.py, backend/tests/integration/api/test_search.py)
 
 **Checkpoint**: Search returns local results; empty results prompt IMDB import
 
@@ -95,6 +98,7 @@
 
 - [ ] T030 [US3] Create backend/app/services/import_service.py with import_movie_by_imdb(imdb_id) — calls TMDBClient.find_by_imdb_id, checks uniqueness (tmdb_id), creates Movie record, returns movie
 - [ ] T031 [US3] Add POST /api/v1/movies/import route to backend/app/api/movies.py — validates IMDB ID format, delegates to ImportService, handles 409/404/502
+- [ ] T031a [US3] Write pytest tests for import_service and API endpoint (backend/tests/unit/test_import_service.py, backend/tests/integration/api/test_import.py)
 
 **Checkpoint**: IMDB ID import works; duplicate and error cases handled
 
@@ -110,6 +114,7 @@
 
 - [ ] T032 [US4] Add get_movie_detail(movie_id) to backend/app/services/movie_service.py — returns full movie metadata
 - [ ] T033 [US4] Add GET /api/v1/movies/{movie_id} route to backend/app/api/movies.py — returns MovieDetailResponse, handles 404
+- [ ] T033a [US4] Write pytest tests for movie detail endpoint (backend/tests/integration/api/test_movie_detail.py)
 
 **Checkpoint**: Movie detail view shows all metadata
 
@@ -125,6 +130,7 @@
 
 - [ ] T034 [US5] Create backend/app/services/watchlist_service.py with create_watchlist(name), list_watchlists(), rename_watchlist(watchlist_id, name), delete_watchlist(watchlist_id), add_to_watchlist(watchlist_id, movie_id), list_watchlist_entries(watchlist_id, status, sort, order, page, per_page), mark_watched(entry_id), remove_from_watchlist(entry_id)
 - [ ] T035 [US5] Create backend/app/api/watchlist.py with watchlists and watchlist entries routes — delegates to WatchlistService, handles 404/409
+- [ ] T035a [US5] Write pytest tests for watchlist_service and API endpoints (backend/tests/unit/test_watchlist_service.py, backend/tests/integration/api/test_watchlist.py)
 
 **Checkpoint**: Full watchlist CRUD works; idempotent add; remove doesn't delete movie
 
@@ -140,6 +146,7 @@
 
 - [ ] T036 [US6] Add delete_movie(movie_id) to backend/app/services/movie_service.py — deletes movie (watchlist cascade via FK), handles not found
 - [ ] T037 [US6] Add DELETE /api/v1/movies/{movie_id} route to backend/app/api/movies.py — returns 204, handles 404
+- [ ] T037a [US6] Write pytest tests for movie deletion with cascade (backend/tests/integration/api/test_movie_delete.py)
 
 **Checkpoint**: Movie deletion works with cascade
 
@@ -155,6 +162,7 @@
 
 - [ ] T038 [US7] Create backend/app/services/job_service.py with get_job(job_id) — returns job status, progress, timestamps
 - [ ] T039 [US7] Create backend/app/api/jobs.py with GET /api/v1/jobs/{job_id} route — returns JobResponse, handles 404
+- [ ] T039a [US7] Write pytest tests for job_service and API endpoint (backend/tests/unit/test_job_service.py, backend/tests/integration/api/test_jobs.py)
 
 **Checkpoint**: Job status polling works
 
