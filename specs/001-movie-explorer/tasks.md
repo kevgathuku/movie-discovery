@@ -35,7 +35,7 @@
 - [x] T008 [P] Create backend/app/models/__init__.py, backend/app/models/movie.py with Movie model (BigInteger PK, tmdb_id, imdb_id, title, release_date, synopsis, genres JSON, rating, poster_url, source enum, timestamps, indexes per data-model.md)
 - [x] T009 [P] Create backend/app/models/watchlist.py with Watchlist model (BigInteger PK, name, created_at) and WatchlistEntry model (BigInteger PK, watchlist_id FK, movie_id FK ON DELETE CASCADE, status enum, added_at, watched_at, unique constraint on watchlist_id+movie_id)
 - [x] T010 [P] Create backend/app/models/job.py with Job model (String(20) Sqids PK, job_type, status enum, progress, timestamps, error_info JSON, celery_task_id)
-- [ ] T011 Generate initial Alembic migration for all four tables (alembic revision --autogenerate)
+- [x] T011 Generate initial Alembic migration for all four tables (alembic revision --autogenerate)
 - [x] T012 [P] Create backend/app/clients/tmdb_client.py with TMDBClient class (httpx.AsyncClient, auth, search, movie details, find by IMDB ID, error handling, retry)
 - [x] T013 Create backend/app/dependencies.py with FastAPI DI: get_db (async session yield), get_tmdb_client
 - [x] T014 Create backend/app/main.py with create_app factory, lifespan (engine, http client), CORS, router mounting
