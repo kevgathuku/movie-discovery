@@ -64,6 +64,14 @@
 
 ---
 
+## 2026-09-04: CI postgres hostname resolution
+
+**Decision**: Set `TEST_DATABASE_URL` and `ADMIN_DATABASE_URL` environment variables in the GitHub Actions workflow to `localhost:5433`.
+
+**Reason**: The test conftest defaults to `postgres:5432` (Docker service name), which doesn't resolve on the GitHub Actions runner. The CI postgres service maps port 5433 on the host, so the env vars must point to `localhost:5433`.
+
+---
+
 ## 2026-09-04: Deterministic dependency management with uv lock
 
 **Decision**: Use `uv lock` + `uv sync` as the single source of truth for dependencies. Never run `uv pip install` inside Docker containers.

@@ -1,4 +1,4 @@
-# Movie Discovery
+# Movie Explorer
 
 FastAPI backend for discovering, searching, importing, and tracking movies. Uses The Movie Database (TMDB) as the external data source, with a local PostgreSQL cache for offline browsing and watchlist management.
 
@@ -28,11 +28,8 @@ cat > .env <<EOF
 TMDB_API_KEY=your_tmdb_api_key_here
 EOF
 
-# Start all services
+# Start all services (migrations run automatically on startup)
 docker compose up -d
-
-# Run database migrations
-docker compose exec api alembic upgrade head
 ```
 
 The API is available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
@@ -67,38 +64,37 @@ This fetches trending movies from TMDB into the local database. The scheduler al
 
 ### Health
 
-| Method | Path      | Description       | Status      |
-|--------|-----------|-------------------|-------------|
-| GET    | `/health` | Health check      | Implemented |
+| Method | Path      | Description       |
+|--------|-----------|-------------------|
+| GET    | `/health` | Health check      |
 
 ### Movies
 
 | Method | Path                     | Description          | Status      |
 |--------|--------------------------|----------------------|-------------|
 | GET    | `/api/v1/movies`         | List movies (paginated) | Implemented |
-| GET    | `/api/v1/movies/{id}`    | Get movie details    | Stub        |
+| GET    | `/api/v1/movies/{id}`    | Get movie details    | Implemented |
 | DELETE | `/api/v1/movies/{id}`    | Delete a movie       | Stub        |
-| POST   | `/api/v1/movies/import`  | Import from TMDB     | Stub        |
+| POST   | `/api/v1/movies/import`  | Import from TMDB by IMDB ID | Implemented |
 
 ### Search
 
 | Method | Path              | Description              | Status |
 |--------|-------------------|--------------------------|--------|
-| GET    | `/api/v1/search`  | Search movies locally, fallback to TMDB | Stub   |
+| GET    | `/api/v1/search`  | Search movies locally, fallback to TMDB | Implemented |
 
 ### Watchlists
 
 | Method | Path                                        | Description           | Status |
 |--------|---------------------------------------------|-----------------------|--------|
-| GET    | `/api/v1/watchlists`                        | List watchlists       | Stub   |
-| POST   | `/api/v1/watchlists`                        | Create watchlist      | Stub   |
-| GET    | `/api/v1/watchlists/{id}`                   | Get watchlist         | Stub   |
-| PATCH  | `/api/v1/watchlists/{id}`                   | Update watchlist      | Stub   |
-| DELETE | `/api/v1/watchlists/{id}`                   | Delete watchlist      | Stub   |
-| GET    | `/api/v1/watchlists/{id}/entries`           | List entries          | Stub   |
-| POST   | `/api/v1/watchlists/{id}/entries`           | Add movie to watchlist| Stub   |
-| PATCH  | `/api/v1/watchlists/{id}/entries/{entry_id}`| Update entry status   | Stub   |
-| DELETE | `/api/v1/watchlists/{id}/entries/{entry_id}`| Remove entry          | Stub   |
+| GET    | `/api/v1/watchlists`                        | List watchlists       | Implemented |
+| POST   | `/api/v1/watchlists`                        | Create watchlist      | Implemented |
+| PATCH  | `/api/v1/watchlists/{id}`                   | Rename watchlist      | Implemented |
+| DELETE | `/api/v1/watchlists/{id}`                   | Delete watchlist      | Implemented |
+| GET    | `/api/v1/watchlists/{id}/entries`           | List entries (filterable, sortable) | Implemented |
+| POST   | `/api/v1/watchlists/{id}/entries`           | Add movie to watchlist| Implemented |
+| PATCH  | `/api/v1/watchlists/{id}/entries/{entry_id}`| Mark entry as watched | Implemented |
+| DELETE | `/api/v1/watchlists/{id}/entries/{entry_id}`| Remove entry          | Implemented |
 
 ### Jobs
 
@@ -108,10 +104,10 @@ This fetches trending movies from TMDB into the local database. The scheduler al
 
 ## Data Model
 
-- **Movie** — TMDB-sourced movie metadata (tmdb_id, imdb_id, title, release_date, synopsis, genres, rating, poster_url, source)
-- **Watchlist** — Named collection of movies
-- **WatchlistEntry** — Movie-to-watchlist association with status (`to_watch` / `watched`)
-- **Job** — Background task tracking (status, progress, error info)
+- **Movie** — TMDB-sourced movie metadata (tmdb_id, imdb_id, title, release_date, synopsis, genres, rating, poster_url, source, created_at, updated_at)
+- **Watchlist** — Named collection of movies (id, name, created_at)
+- **WatchlistEntry** — Movie-to-watchlist association with status (`to_watch` / `watched`), timestamps (added_at, watched_at)
+- **Job** — Background task tracking (id, job_type, status, progress, created_at, started_at, completed_at, error_info, celery_task_id)
 
 ## Project Structure
 
@@ -132,11 +128,28 @@ backend/
 ├── alembic/            # Database migrations
 ├── tests/              # Test suite
 ├── Dockerfile
+├── docker-entrypoint.sh
 └── pyproject.toml
 ```
 
-## Running Tests
+## Development
+
+### Linting
 
 ```bash
+uv run ruff check app/ tests/
+```
+
+### Running Tests
+
+```bash
+# On host (requires TEST_DATABASE_URL and ADMIN_DATABASE_URL pointing to a running PostgreSQL)
+uv run pytest
+
+# Inside Docker
 docker compose exec api uv run pytest
 ```
+
+### CI
+
+Tests and linting run automatically via GitHub Actions on every push and pull request.
