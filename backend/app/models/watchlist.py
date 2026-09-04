@@ -5,6 +5,7 @@ from sqlalchemy import BigInteger, DateTime, ForeignKey, String, UniqueConstrain
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.movie import Movie
 
 
 class Watchlist(Base):
@@ -16,7 +17,7 @@ class Watchlist(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    entries: Mapped[list["WatchlistEntry"]] = relationship(
+    entries: Mapped[list[WatchlistEntry]] = relationship(
         back_populates="watchlist", cascade="all, delete-orphan"
     )
 
@@ -46,8 +47,8 @@ class WatchlistEntry(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    watchlist: Mapped["Watchlist"] = relationship(back_populates="entries")
-    movie: Mapped["Movie"] = relationship()
+    watchlist: Mapped[Watchlist] = relationship(back_populates="entries")
+    movie: Mapped[Movie] = relationship()
 
     __table_args__ = (
         UniqueConstraint(

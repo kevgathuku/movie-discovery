@@ -170,6 +170,9 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+
 # LSP config files
 pyrightconfig.json
 

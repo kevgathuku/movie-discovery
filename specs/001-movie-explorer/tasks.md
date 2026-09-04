@@ -152,19 +152,15 @@
 
 ---
 
-## Phase 9: User Story 7 — Job Status Tracking (Priority: P7)
+## Phase 9: User Story 7 — ~~Job Status Tracking~~ (REMOVED FROM SCOPE)
 
-**Goal**: Users check background job status (trending sync, import)
-
-**Independent Test**: GET /api/v1/jobs/{job_id} returns current job state
+> **Note**: Job status tracking was removed from scope.
 
 ### Implementation
 
-- [ ] T038 [US7] Create backend/app/services/job_service.py with get_job(job_id) — returns job status, progress, timestamps
-- [ ] T039 [US7] Create backend/app/api/jobs.py with GET /api/v1/jobs/{job_id} route — returns JobResponse, handles 404
-- [ ] T039a [US7] Write pytest tests for job_service and API endpoint (backend/tests/unit/test_job_service.py, backend/tests/integration/api/test_jobs.py)
-
-**Checkpoint**: Job status polling works
+- ~~T038 [US7] Create backend/app/services/job_service.py~~
+- ~~T039 [US7] Create backend/app/api/jobs.py~~
+- ~~T039a [US7] Write pytest tests~~
 
 ---
 
@@ -172,11 +168,11 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T040 Add structured logging with request_id, job_id, tmdb_id context (Principle XIX)
-- [ ] T041 Add global exception handler in backend/app/main.py mapping domain exceptions to HTTP responses (Principle XX)
-- [ ] T042 Create frontend/ project skeleton (package.json, Dockerfile, placeholder components)
-- [ ] T043 Run quickstart.md validation scenarios end-to-end
-- [ ] T044 Final review: verify all constitution principles are respected
+- [x] T040 Add structured logging with request_id, job_id, tmdb_id context (Principle XIX)
+- [x] T041 Add global exception handler in backend/app/main.py mapping domain exceptions to HTTP responses (Principle XX)
+- [x] T042 Create frontend/ project skeleton (package.json, Dockerfile, placeholder components)
+- [x] T043 Run quickstart.md validation scenarios end-to-end
+- [x] T044 Final review: verify all constitution principles are respected
 
 ---
 
@@ -245,3 +241,15 @@
 - Each user story should be independently completable and testable
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
+
+---
+
+## Phase 11: Convergence
+
+**Purpose**: Close gaps between spec/plan/tasks and actual codebase implementation
+
+- [x] T045 Create `backend/tests/unit/test_repositories.py` with unit tests for MovieRepository (get_by_id, get_by_tmdb_id, get_by_imdb_id, search_by_title, list_movies, create, delete), WatchlistRepository (list, get_by_id, create, update_name, delete), WatchlistEntryRepository (get_by_id, get_by_watchlist_and_movie, list_entries, create, update_status, delete), and JobRepository (get_by_id, create, update_status) per T020a (missing)
+- [x] T046 Create `backend/tests/unit/test_movie_service.py` with unit tests for MovieService.list_movies (pagination) and MovieService.get_movie_detail (returns metadata, raises MovieNotFoundError for missing) per T027a (missing)
+- [x] T047 Create `backend/tests/unit/test_watchlist_service.py` with unit tests for WatchlistService (create_watchlist, list_watchlists, rename_watchlist, delete_watchlist, add_to_watchlist, list_watchlist_entries with filters/sort, mark_watched, remove_from_watchlist) per T035a (missing)
+- [x] T048 Refactor `backend/app/dependencies.py` get_tmdb_client() to retrieve the lifespan-managed TMDBClient from `request.app.state` instead of creating a new httpx.AsyncClient per request, preventing resource leaks per Principle XVI (partial)
+- [x] T049 Verify MovieDetailResponse.genres schema type matches actual TMDB genre data shape stored in Movie.genres JSON column; align list[str] vs dict per R10 (partial)

@@ -23,6 +23,7 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.25",
     "pytest-celery>=1.0",
+    "pytest-mock>=3.14",
     "httpx>=0.28",
     "ruff>=0.8",
     "aiosqlite>=0.20",
@@ -41,7 +42,13 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B"]
+ignore = ["B008"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest-mock>=3.15.1",
+]

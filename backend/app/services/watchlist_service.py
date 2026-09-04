@@ -11,7 +11,6 @@ from app.exceptions import (
     WatchlistEntryNotFoundError,
     WatchlistNotFoundError,
 )
-from app.models.movie import Movie
 from app.models.watchlist import Watchlist, WatchlistEntry, WatchlistStatus
 from app.repositories.movie_repo import MovieRepository
 
