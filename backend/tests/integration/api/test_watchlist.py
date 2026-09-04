@@ -246,3 +246,55 @@ async def test_list_entries_filter_by_status(
     )
     assert response.status_code == 200
     assert response.json()["total"] == 0
+
+
+@pytest.mark.asyncio
+async def test_add_to_watchlist_verifies_entry_in_list(
+    client, sample_watchlist, sample_movie
+):
+    """Add a movie then confirm it appears when listing entries."""
+    add_response = await client.post(
+        f"/api/v1/watchlists/{sample_watchlist.id}/entries",
+        json={"movie_id": sample_movie.id},
+    )
+    assert add_response.status_code == 201
+
+    list_response = await client.get(
+        f"/api/v1/watchlists/{sample_watchlist.id}/entries"
+    )
+    data = list_response.json()
+    assert data["total"] == 1
+    assert data["entries"][0]["movie_id"] == sample_movie.id
+    assert data["entries"][0]["status"] == "to_watch"
+
+
+@pytest.mark.asyncio
+async def test_delete_watchlist_removes_entries(
+    client, watchlist_with_entry, sample_watchlist
+):
+    """Deleting a watchlist must cascade-delete its entries."""
+    response = await client.delete(f"/api/v1/watchlists/{sample_watchlist.id}")
+    assert response.status_code == 204
+
+    list_response = await client.get("/api/v1/watchlists")
+    assert list_response.json()["watchlists"] == []
+
+
+@pytest.mark.asyncio
+async def test_list_entries_response_shape(
+    client, watchlist_with_entry, sample_watchlist
+):
+    """Entry response must include all fields the frontend list needs."""
+    response = await client.get(
+        f"/api/v1/watchlists/{sample_watchlist.id}/entries"
+    )
+    entry = response.json()["entries"][0]
+
+    required_fields = [
+        "id", "watchlist_id", "movie_id", "status", "added_at",
+    ]
+    for field in required_fields:
+        assert field in entry, f"Missing field: {field}"
+
+    assert "movie" in entry, "Missing nested movie object"
+    assert "title" in entry["movie"]

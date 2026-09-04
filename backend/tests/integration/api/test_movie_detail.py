@@ -128,3 +128,60 @@ async def test_lazy_enrichment_handles_tmdb_failure(client, movie_without_imdb):
 
     assert response.status_code == 200
     assert response.json()["imdb_id"] is None
+
+
+@pytest.mark.asyncio
+async def test_movie_detail_null_genres(client, db_session):
+    """Null genres must not cause a serialization error."""
+    movie = Movie(
+        tmdb_id=550,
+        title="Fight Club",
+        source=MovieSource.sync,
+    )
+    db_session.add(movie)
+    await db_session.commit()
+    await db_session.refresh(movie)
+
+    response = await client.get(f"/api/v1/movies/{movie.id}")
+
+    assert response.status_code == 200
+    assert response.json()["genres"] is None
+
+
+@pytest.mark.asyncio
+async def test_movie_detail_null_optional_fields(client, db_session):
+    """Movie with only required fields must still serialize correctly."""
+    movie = Movie(
+        tmdb_id=550,
+        title="Minimal Movie",
+        source=MovieSource.sync,
+    )
+    db_session.add(movie)
+    await db_session.commit()
+    await db_session.refresh(movie)
+
+    response = await client.get(f"/api/v1/movies/{movie.id}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Minimal Movie"
+    assert data["imdb_id"] is None
+    assert data["synopsis"] is None
+    assert data["release_date"] is None
+    assert data["rating"] is None
+    assert data["poster_url"] is None
+    assert data["genres"] is None
+
+
+@pytest.mark.asyncio
+async def test_movie_detail_response_shape(client, sample_movie):
+    """Response must contain all fields the frontend detail page needs."""
+    response = await client.get(f"/api/v1/movies/{sample_movie.id}")
+    data = response.json()
+
+    required_fields = [
+        "id", "tmdb_id", "imdb_id", "title", "release_date",
+        "synopsis", "genres", "rating", "poster_url", "created_at", "updated_at",
+    ]
+    for field in required_fields:
+        assert field in data, f"Missing field: {field}"

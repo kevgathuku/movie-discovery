@@ -85,3 +85,38 @@ async def test_search_pagination(client, db_session):
     assert data["total"] == 5
     assert data["page"] == 1
     assert data["per_page"] == 2
+
+
+async def test_search_results_contain_required_fields(client, db_session):
+    """Every search result must have fields the frontend needs."""
+    await _create_movie(db_session, 550, "Fight Club")
+    await db_session.commit()
+
+    response = await client.get("/api/v1/search", params={"q": "fight"})
+    data = response.json()
+    result = data["results"][0]
+
+    required_fields = ["id", "tmdb_id", "title"]
+    for field in required_fields:
+        assert field in result, f"Missing field: {field}"
+
+
+async def test_search_no_results_has_suggestion(client, db_session):
+    """Empty results must include actionable suggestion text."""
+    response = await client.get("/api/v1/search", params={"q": "zzzznotfound"})
+    data = response.json()
+
+    assert data["results"] == []
+    assert data["total"] == 0
+    assert data["suggestion"] is not None
+    assert "TMDB" in data["suggestion"] or "IMDB" in data["suggestion"]
+
+
+async def test_search_does_not_match_unrelated_titles(client, db_session):
+    """Search for 'Batman' must not return 'Fight Club'."""
+    await _create_movie(db_session, 550, "Fight Club")
+    await db_session.commit()
+
+    response = await client.get("/api/v1/search", params={"q": "batman"})
+    data = response.json()
+    assert data["total"] == 0
