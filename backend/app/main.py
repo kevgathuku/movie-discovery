@@ -1,6 +1,7 @@
 import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -56,14 +57,18 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(MovieAlreadyExistsError)
-    async def movie_already_exists_handler(request: Request, exc: MovieAlreadyExistsError):
+    async def movie_already_exists_handler(
+        request: Request, exc: MovieAlreadyExistsError
+    ):
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={"detail": str(exc)},
         )
 
     @app.exception_handler(WatchlistNotFoundError)
-    async def watchlist_not_found_handler(request: Request, exc: WatchlistNotFoundError):
+    async def watchlist_not_found_handler(
+        request: Request, exc: WatchlistNotFoundError
+    ):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": "Watchlist not found"},
@@ -79,7 +84,9 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(WatchlistDuplicateError)
-    async def watchlist_duplicate_handler(request: Request, exc: WatchlistDuplicateError):
+    async def watchlist_duplicate_handler(
+        request: Request, exc: WatchlistDuplicateError
+    ):
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={"detail": "Movie is already in this watchlist"},
@@ -89,7 +96,9 @@ def create_app() -> FastAPI:
     async def external_api_error_handler(request: Request, exc: ExternalAPIError):
         return JSONResponse(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            content={"detail": "TMDB API is currently unavailable. Please try again later."},
+            content={
+                "detail": "TMDB API is currently unavailable. Please try again later."
+            },
         )
 
     from app.api.jobs import router as jobs_router

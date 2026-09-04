@@ -121,7 +121,9 @@ async def test_add_to_watchlist(client, sample_watchlist, sample_movie):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_duplicate(client, watchlist_with_entry, sample_watchlist, sample_movie):
+async def test_add_to_watchlist_duplicate(
+    client, watchlist_with_entry, sample_watchlist, sample_movie
+):
     response = await client.post(
         f"/api/v1/watchlists/{sample_watchlist.id}/entries",
         json={"movie_id": sample_movie.id},
@@ -201,7 +203,9 @@ async def test_remove_from_watchlist(client, watchlist_with_entry, sample_watchl
 
     assert response.status_code == 204
 
-    list_response = await client.get(f"/api/v1/watchlists/{sample_watchlist.id}/entries")
+    list_response = await client.get(
+        f"/api/v1/watchlists/{sample_watchlist.id}/entries"
+    )
     assert list_response.json()["total"] == 0
 
 
@@ -228,7 +232,9 @@ async def test_remove_from_watchlist_does_not_delete_movie(
 
 
 @pytest.mark.asyncio
-async def test_list_entries_filter_by_status(client, watchlist_with_entry, sample_watchlist, sample_movie):
+async def test_list_entries_filter_by_status(
+    client, watchlist_with_entry, sample_watchlist, sample_movie
+):
     response = await client.get(
         f"/api/v1/watchlists/{sample_watchlist.id}/entries?status=to_watch"
     )

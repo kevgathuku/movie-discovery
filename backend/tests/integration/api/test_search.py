@@ -1,4 +1,3 @@
-import pytest
 
 from app.models.movie import Movie, MovieSource
 from app.repositories.movie_repo import MovieRepository
@@ -77,7 +76,9 @@ async def test_search_pagination(client, db_session):
         await _create_movie(db_session, 100 + i, f"Movie {i}")
     await db_session.commit()
 
-    response = await client.get("/api/v1/search", params={"q": "movie", "per_page": 2, "page": 1})
+    response = await client.get(
+        "/api/v1/search", params={"q": "movie", "per_page": 2, "page": 1}
+    )
     assert response.status_code == 200
     data = response.json()
     assert len(data["results"]) == 2

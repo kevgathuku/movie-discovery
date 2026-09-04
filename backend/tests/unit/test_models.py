@@ -1,7 +1,6 @@
-import pytest
+from app.models.job import Job, JobStatus
 from app.models.movie import Movie, MovieSource
 from app.models.watchlist import Watchlist, WatchlistEntry, WatchlistStatus
-from app.models.job import Job, JobStatus
 
 
 def test_movie_source_enum():

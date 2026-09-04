@@ -1,12 +1,11 @@
-import pytest
-from app.schemas.movie import MovieListResponse, MovieDetailResponse, MovieImportRequest
-from app.schemas.watchlist import (
-    WatchlistResponse,
-    WatchlistCreate,
-    WatchlistEntryResponse,
-    WatchlistEntryCreate,
-)
 from app.schemas.job import JobResponse
+from app.schemas.movie import MovieDetailResponse, MovieImportRequest, MovieListResponse
+from app.schemas.watchlist import (
+    WatchlistCreate,
+    WatchlistEntryCreate,
+    WatchlistEntryResponse,
+    WatchlistResponse,
+)
 
 
 def test_movie_list_response_schema():

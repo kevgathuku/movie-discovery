@@ -4,17 +4,18 @@ Revision ID: fa552d8fed5f
 Revises: 
 Create Date: 2026-09-02 10:26:33.642675
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = 'fa552d8fed5f'
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -22,9 +23,11 @@ def upgrade() -> None:
     op.create_table('jobs',
     sa.Column('id', sa.String(length=20), nullable=False),
     sa.Column('job_type', sa.String(length=100), nullable=False),
-    sa.Column('status', sa.Enum('queued', 'processing', 'completed', 'failed', name='jobstatus'), nullable=False),
+    sa.Column('status', sa.Enum('queued', 'processing', 'completed', 'failed',
+              name='jobstatus'), nullable=False),
     sa.Column('progress', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.Column('started_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('error_info', postgresql.JSON(astext_type=sa.Text()), nullable=True),
@@ -46,33 +49,40 @@ def upgrade() -> None:
     sa.Column('rating', sa.Float(), nullable=True),
     sa.Column('poster_url', sa.String(length=500), nullable=True),
     sa.Column('source', sa.Enum('manual', 'sync', name='moviesource'), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('imdb_id'),
     sa.UniqueConstraint('tmdb_id')
     )
-    op.create_index('ix_movies_imdb_id', 'movies', ['imdb_id'], unique=True, postgresql_where='imdb_id IS NOT NULL')
+    op.create_index('ix_movies_imdb_id', 'movies', ['imdb_id'], unique=True,
+                    postgresql_where='imdb_id IS NOT NULL')
     op.create_index('ix_movies_source', 'movies', ['source'], unique=False)
     op.create_index('ix_movies_title', 'movies', ['title'], unique=False)
     op.create_index('ix_movies_tmdb_id', 'movies', ['tmdb_id'], unique=True)
     op.create_table('watchlists',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=200), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('watchlist_entries',
     sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
     sa.Column('watchlist_id', sa.BigInteger(), nullable=False),
     sa.Column('movie_id', sa.BigInteger(), nullable=False),
-    sa.Column('status', sa.Enum('to_watch', 'watched', name='watchliststatus'), nullable=False),
-    sa.Column('added_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('status', sa.Enum('to_watch', 'watched', name='watchliststatus'),
+              nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.Column('watched_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['watchlist_id'], ['watchlists.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('watchlist_id', 'movie_id', name='uq_watchlist_entries_watchlist_movie')
+    sa.UniqueConstraint('watchlist_id', 'movie_id',
+                        name='uq_watchlist_entries_watchlist_movie')
     )
     # ### end Alembic commands ###
 
@@ -84,7 +94,8 @@ def downgrade() -> None:
     op.drop_index('ix_movies_tmdb_id', table_name='movies')
     op.drop_index('ix_movies_title', table_name='movies')
     op.drop_index('ix_movies_source', table_name='movies')
-    op.drop_index('ix_movies_imdb_id', table_name='movies', postgresql_where='imdb_id IS NOT NULL')
+    op.drop_index('ix_movies_imdb_id', table_name='movies',
+                   postgresql_where='imdb_id IS NOT NULL')
     op.drop_table('movies')
     op.drop_index('ix_jobs_status', table_name='jobs')
     op.drop_index('ix_jobs_job_type', table_name='jobs')

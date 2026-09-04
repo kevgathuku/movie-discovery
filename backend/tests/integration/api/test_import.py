@@ -3,8 +3,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.dependencies import get_tmdb_client
-from app.models.movie import Movie
-from sqlalchemy import select
 
 
 def _mock_tmdb_client(find_return=None, poster_url="https://image.tmdb.org/t/p/w500/poster.jpg"):

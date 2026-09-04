@@ -1,8 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from sqlalchemy import text
 
 from app.dependencies import get_tmdb_client
 from app.models.movie import Movie, MovieSource
