@@ -241,3 +241,15 @@
 - Each user story should be independently completable and testable
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
+
+---
+
+## Phase 11: Convergence
+
+**Purpose**: Close gaps between spec/plan/tasks and actual codebase implementation
+
+- [x] T045 Create `backend/tests/unit/test_repositories.py` with unit tests for MovieRepository (get_by_id, get_by_tmdb_id, get_by_imdb_id, search_by_title, list_movies, create, delete), WatchlistRepository (list, get_by_id, create, update_name, delete), WatchlistEntryRepository (get_by_id, get_by_watchlist_and_movie, list_entries, create, update_status, delete), and JobRepository (get_by_id, create, update_status) per T020a (missing)
+- [x] T046 Create `backend/tests/unit/test_movie_service.py` with unit tests for MovieService.list_movies (pagination) and MovieService.get_movie_detail (returns metadata, raises MovieNotFoundError for missing) per T027a (missing)
+- [x] T047 Create `backend/tests/unit/test_watchlist_service.py` with unit tests for WatchlistService (create_watchlist, list_watchlists, rename_watchlist, delete_watchlist, add_to_watchlist, list_watchlist_entries with filters/sort, mark_watched, remove_from_watchlist) per T035a (missing)
+- [x] T048 Refactor `backend/app/dependencies.py` get_tmdb_client() to retrieve the lifespan-managed TMDBClient from `request.app.state` instead of creating a new httpx.AsyncClient per request, preventing resource leaks per Principle XVI (partial)
+- [x] T049 Verify MovieDetailResponse.genres schema type matches actual TMDB genre data shape stored in Movie.genres JSON column; align list[str] vs dict per R10 (partial)

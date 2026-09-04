@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.clients.tmdb_client import TMDBClient
@@ -19,5 +20,5 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
             raise
 
 
-def get_tmdb_client() -> TMDBClient:
-    return TMDBClient(api_key=settings.TMDB_API_KEY)
+def get_tmdb_client(request: Request) -> TMDBClient:
+    return request.app.state.tmdb_client

@@ -59,6 +59,9 @@ class ImportService:
             title=tmdb_data.get("title", ""),
             synopsis=tmdb_data.get("overview"),
             release_date=release_date,
+            genres=[
+                g["name"] for g in tmdb_data.get("genres", [])
+            ] or None,
             rating=tmdb_data.get("vote_average"),
             poster_url=self.tmdb.get_poster_url(poster_path),
             source=MovieSource.sync,
