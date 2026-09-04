@@ -50,7 +50,7 @@ async def db_session():
 
 
 @pytest.fixture
-async def client(db_session):
+async def client(db_session, mocker):
     from app.main import create_app
 
     async def override_get_db():
@@ -63,6 +63,10 @@ async def client(db_session):
 
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
+
+    mock_tmdb = mocker.MagicMock()
+    mock_tmdb.close = mocker.MagicMock()
+    app.state.tmdb_client = mock_tmdb
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

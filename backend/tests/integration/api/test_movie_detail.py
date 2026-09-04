@@ -1,5 +1,4 @@
 from datetime import date
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -86,9 +85,9 @@ async def test_get_movie_detail_includes_genres(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_lazy_enrichment_fetches_imdb_id(client, movie_without_imdb):
-    mock_client = MagicMock()
-    mock_client.get_movie_details = AsyncMock(return_value={
+async def test_lazy_enrichment_fetches_imdb_id(client, movie_without_imdb, mocker):
+    mock_client = mocker.MagicMock()
+    mock_client.get_movie_details = mocker.AsyncMock(return_value={
         "external_ids": {"imdb_id": "tt0137566"}
     })
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
@@ -102,9 +101,9 @@ async def test_lazy_enrichment_fetches_imdb_id(client, movie_without_imdb):
 
 
 @pytest.mark.asyncio
-async def test_lazy_enrichment_skips_when_imdb_id_exists(client, sample_movie):
-    mock_client = MagicMock()
-    mock_client.get_movie_details = AsyncMock()
+async def test_lazy_enrichment_skips_when_imdb_id_exists(client, sample_movie, mocker):
+    mock_client = mocker.MagicMock()
+    mock_client.get_movie_details = mocker.AsyncMock()
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     response = await client.get(f"/api/v1/movies/{sample_movie.id}")
@@ -115,11 +114,11 @@ async def test_lazy_enrichment_skips_when_imdb_id_exists(client, sample_movie):
 
 
 @pytest.mark.asyncio
-async def test_lazy_enrichment_handles_tmdb_failure(client, movie_without_imdb):
+async def test_lazy_enrichment_handles_tmdb_failure(client, movie_without_imdb, mocker):
     from app.exceptions import ExternalAPIError
 
-    mock_client = MagicMock()
-    mock_client.get_movie_details = AsyncMock(
+    mock_client = mocker.MagicMock()
+    mock_client.get_movie_details = mocker.AsyncMock(
         side_effect=ExternalAPIError("TMDB", "timeout")
     )
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
@@ -135,6 +134,7 @@ async def test_movie_detail_null_genres(client, db_session):
     """Null genres must not cause a serialization error."""
     movie = Movie(
         tmdb_id=550,
+        imdb_id="tt0137566",
         title="Fight Club",
         source=MovieSource.sync,
     )
@@ -153,6 +153,7 @@ async def test_movie_detail_null_optional_fields(client, db_session):
     """Movie with only required fields must still serialize correctly."""
     movie = Movie(
         tmdb_id=550,
+        imdb_id="tt0137566",
         title="Minimal Movie",
         source=MovieSource.sync,
     )
@@ -165,7 +166,6 @@ async def test_movie_detail_null_optional_fields(client, db_session):
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == "Minimal Movie"
-    assert data["imdb_id"] is None
     assert data["synopsis"] is None
     assert data["release_date"] is None
     assert data["rating"] is None

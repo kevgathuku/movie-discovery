@@ -1,5 +1,3 @@
-from unittest.mock import AsyncMock, MagicMock
-
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,19 +13,19 @@ from app.services.watchlist_service import WatchlistService
 
 
 @pytest.fixture
-def mock_db():
-    session = AsyncMock(spec=AsyncSession)
+def mock_db(mocker):
+    session = mocker.AsyncMock(spec=AsyncSession)
     return session
 
 
-def _mock_scalar_result(value):
-    result = MagicMock()
+def _mock_scalar_result(mocker, value):
+    result = mocker.MagicMock()
     result.scalar_one_or_none.return_value = value
     return result
 
 
-def _mock_scalars_result(values):
-    result = MagicMock()
+def _mock_scalars_result(mocker, values):
+    result = mocker.MagicMock()
     result.scalars.return_value.all.return_value = values
     return result
 
@@ -36,17 +34,17 @@ def _mock_scalars_result(values):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_sets_default_status(mock_db):
+async def test_add_to_watchlist_sets_default_status(mock_db, mocker):
     """Verify new entries default to to_watch and link correct IDs."""
-    mock_watchlist = MagicMock(spec=Watchlist)
-    mock_movie = MagicMock(spec=Movie)
+    mock_watchlist = mocker.MagicMock(spec=Watchlist)
+    mock_movie = mocker.MagicMock(spec=Movie)
     mock_movie.id = 100
 
     mock_db.execute.side_effect = [
-        _mock_scalar_result(mock_watchlist),
-        _mock_scalar_result(mock_movie),
-        _mock_scalar_result(None),  # no duplicate
+        _mock_scalar_result(mocker, mock_watchlist),   # get_watchlist
+        _mock_scalar_result(mocker, None),             # duplicate check
     ]
+    mock_db.get.return_value = mock_movie  # movie_repo.get_by_id
 
     service = WatchlistService(mock_db)
     result = await service.add_to_watchlist(watchlist_id=1, movie_id=100)
@@ -57,8 +55,8 @@ async def test_add_to_watchlist_sets_default_status(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_watchlist_not_found(mock_db):
-    mock_db.execute.return_value = _mock_scalar_result(None)
+async def test_add_to_watchlist_watchlist_not_found(mock_db, mocker):
+    mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
     service = WatchlistService(mock_db)
     with pytest.raises(WatchlistNotFoundError):
@@ -66,11 +64,11 @@ async def test_add_to_watchlist_watchlist_not_found(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_movie_not_found(mock_db):
-    mock_db.execute.side_effect = [
-        _mock_scalar_result(MagicMock(spec=Watchlist)),
-        _mock_scalar_result(None),
-    ]
+async def test_add_to_watchlist_movie_not_found(mock_db, mocker):
+    mock_db.execute.return_value = _mock_scalar_result(
+        mocker, mocker.MagicMock(spec=Watchlist)
+    )
+    mock_db.get.return_value = None  # movie_repo.get_by_id returns None
 
     service = WatchlistService(mock_db)
     with pytest.raises(MovieNotFoundError):
@@ -78,13 +76,18 @@ async def test_add_to_watchlist_movie_not_found(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_duplicate_raises(mock_db):
+async def test_add_to_watchlist_duplicate_raises(mock_db, mocker):
     """Duplicate movie in same watchlist must raise, not silently succeed."""
+    mock_watchlist = mocker.MagicMock(spec=Watchlist)
+    mock_movie = mocker.MagicMock(spec=Movie)
+    mock_movie.id = 100
+    mock_entry = mocker.MagicMock(spec=WatchlistEntry)
+
     mock_db.execute.side_effect = [
-        _mock_scalar_result(MagicMock(spec=Watchlist)),
-        _mock_scalar_result(MagicMock(spec=Movie)),
-        _mock_scalar_result(MagicMock(spec=WatchlistEntry)),  # existing entry
+        _mock_scalar_result(mocker, mock_watchlist),  # get_watchlist
+        _mock_scalar_result(mocker, mock_entry),     # duplicate check
     ]
+    mock_db.get.return_value = mock_movie  # movie_repo.get_by_id
 
     service = WatchlistService(mock_db)
     with pytest.raises(WatchlistDuplicateError):
@@ -95,12 +98,12 @@ async def test_add_to_watchlist_duplicate_raises(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_mark_watched_sets_timestamp(mock_db):
+async def test_mark_watched_sets_timestamp(mock_db, mocker):
     """Verify watched_at is populated when marking as watched."""
-    mock_entry = MagicMock(spec=WatchlistEntry)
+    mock_entry = mocker.MagicMock(spec=WatchlistEntry)
     mock_entry.status = WatchlistStatus.to_watch
     mock_entry.watched_at = None
-    mock_db.execute.return_value = _mock_scalar_result(mock_entry)
+    mock_db.execute.return_value = _mock_scalar_result(mocker, mock_entry)
 
     service = WatchlistService(mock_db)
     result = await service.mark_watched(entry_id=1)
@@ -110,8 +113,8 @@ async def test_mark_watched_sets_timestamp(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_mark_watched_not_found(mock_db):
-    mock_db.execute.return_value = _mock_scalar_result(None)
+async def test_mark_watched_not_found(mock_db, mocker):
+    mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
     service = WatchlistService(mock_db)
     with pytest.raises(WatchlistEntryNotFoundError):
@@ -122,8 +125,8 @@ async def test_mark_watched_not_found(mock_db):
 
 
 @pytest.mark.asyncio
-async def test_remove_from_watchlist_not_found(mock_db):
-    mock_db.execute.return_value = _mock_scalar_result(None)
+async def test_remove_from_watchlist_not_found(mock_db, mocker):
+    mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
     service = WatchlistService(mock_db)
     with pytest.raises(WatchlistEntryNotFoundError):

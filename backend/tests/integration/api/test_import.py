@@ -1,5 +1,3 @@
-from unittest.mock import AsyncMock, MagicMock
-
 import pytest
 from sqlalchemy import select
 
@@ -8,16 +6,16 @@ from app.models.movie import Movie
 
 
 def _mock_tmdb_client(
-    find_return=None, poster_url="https://image.tmdb.org/t/p/w500/poster.jpg"
+    mocker, find_return=None, poster_url="https://image.tmdb.org/t/p/w500/poster.jpg"
 ):
-    mock = MagicMock()
-    mock.find_by_imdb_id = AsyncMock(return_value=find_return)
-    mock.get_poster_url = MagicMock(return_value=poster_url)
+    mock = mocker.MagicMock()
+    mock.find_by_imdb_id = mocker.AsyncMock(return_value=find_return)
+    mock.get_poster_url = mocker.MagicMock(return_value=poster_url)
     return mock
 
 
 @pytest.mark.asyncio
-async def test_import_movie_success(client, db_session):
+async def test_import_movie_success(client, db_session, mocker):
     tmdb_data = {
         "id": 550,
         "title": "Fight Club",
@@ -26,7 +24,7 @@ async def test_import_movie_success(client, db_session):
         "vote_average": 8.4,
         "poster_path": "/poster.jpg",
     }
-    mock_client = _mock_tmdb_client(find_return=tmdb_data)
+    mock_client = _mock_tmdb_client(mocker, find_return=tmdb_data)
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     response = await client.post(
@@ -43,7 +41,7 @@ async def test_import_movie_success(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_import_movie_persists_to_database(client, db_session):
+async def test_import_movie_persists_to_database(client, db_session, mocker):
     """Imported movie must be retrievable from the database afterward."""
     tmdb_data = {
         "id": 550,
@@ -53,7 +51,7 @@ async def test_import_movie_persists_to_database(client, db_session):
         "vote_average": 8.4,
         "poster_path": "/poster.jpg",
     }
-    mock_client = _mock_tmdb_client(find_return=tmdb_data)
+    mock_client = _mock_tmdb_client(mocker, find_return=tmdb_data)
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     await client.post("/api/v1/movies/import", json={"imdb_id": "tt0137566"})
@@ -67,7 +65,9 @@ async def test_import_movie_persists_to_database(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_import_movie_response_contains_all_detail_fields(client, db_session):
+async def test_import_movie_response_contains_all_detail_fields(
+    client, db_session, mocker
+):
     """Response must include all detail fields for the frontend."""
     tmdb_data = {
         "id": 550,
@@ -77,7 +77,7 @@ async def test_import_movie_response_contains_all_detail_fields(client, db_sessi
         "vote_average": 8.4,
         "poster_path": "/poster.jpg",
     }
-    mock_client = _mock_tmdb_client(find_return=tmdb_data)
+    mock_client = _mock_tmdb_client(mocker, find_return=tmdb_data)
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     response = await client.post(
@@ -115,8 +115,8 @@ async def test_import_movie_empty_imdb_id(client):
 
 
 @pytest.mark.asyncio
-async def test_import_movie_not_found(client):
-    mock_client = _mock_tmdb_client(find_return=None)
+async def test_import_movie_not_found(client, mocker):
+    mock_client = _mock_tmdb_client(mocker, find_return=None)
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     response = await client.post(
@@ -128,7 +128,7 @@ async def test_import_movie_not_found(client):
 
 
 @pytest.mark.asyncio
-async def test_import_movie_duplicate(client):
+async def test_import_movie_duplicate(client, mocker):
     tmdb_data = {
         "id": 550,
         "title": "Fight Club",
@@ -137,7 +137,7 @@ async def test_import_movie_duplicate(client):
         "vote_average": 8.4,
         "poster_path": "/poster.jpg",
     }
-    mock_client = _mock_tmdb_client(find_return=tmdb_data)
+    mock_client = _mock_tmdb_client(mocker, find_return=tmdb_data)
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
 
     response1 = await client.post(
@@ -146,7 +146,7 @@ async def test_import_movie_duplicate(client):
     )
     assert response1.status_code == 201
 
-    mock_client.find_by_imdb_id = AsyncMock(return_value=tmdb_data)
+    mock_client.find_by_imdb_id = mocker.AsyncMock(return_value=tmdb_data)
 
     response2 = await client.post(
         "/api/v1/movies/import",
@@ -156,11 +156,11 @@ async def test_import_movie_duplicate(client):
 
 
 @pytest.mark.asyncio
-async def test_import_movie_tmdb_api_error(client):
+async def test_import_movie_tmdb_api_error(client, mocker):
     from app.exceptions import ExternalAPIError
 
-    mock_client = MagicMock()
-    mock_client.find_by_imdb_id = AsyncMock(
+    mock_client = mocker.MagicMock()
+    mock_client.find_by_imdb_id = mocker.AsyncMock(
         side_effect=ExternalAPIError("TMDB", "timeout")
     )
     client._transport.app.dependency_overrides[get_tmdb_client] = lambda: mock_client
