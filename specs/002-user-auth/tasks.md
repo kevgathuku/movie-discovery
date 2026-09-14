@@ -138,12 +138,12 @@
 
 ### Implementation for User Story 5
 
-- [ ] T031 [US5] Tighten CORS in `backend/app/main.py` — `allow_origins` from `CORS_ORIGINS` env (no more `["*"]`); keep `allow_credentials=True`
-- [ ] T032 [P] [US5] Create `frontend/src/services/api.ts` — fetch wrapper attaching Bearer, single-flight refresh + one retry per `contracts/client-auth.md` (tokens in memory only, never `localStorage`)
-- [ ] T033 [P] [US5] Create `frontend/src/context/AuthContext.jsx` + `frontend/src/components/RequireAuth.jsx` / `RequireAdmin.jsx` route guards (`.jsx` to match existing `main.jsx` skeleton)
-- [ ] T034 [P] [US5] Create `frontend/src/pages/Login.jsx` (register + login forms with loading/error states)
-- [ ] T035 [US5] Create `frontend/src/pages/AdminJobs.jsx` (calls `/admin/jobs`, loading/error/empty states; depends on T032)
-- [ ] T036 [P] [US5] Frontend auth flow tests in `frontend/tests/` (login persistence, 401→refresh→retry, admin guard)
+- [X] T031 [US5] Tighten CORS in `backend/app/main.py` — `allow_origins` from `CORS_ORIGINS` env (no more `["*"]`); keep `allow_credentials=True`
+- [X] T032 [P] [US5] Create `frontend/src/services/api.ts` — fetch wrapper attaching Bearer, single-flight refresh + one retry per `contracts/client-auth.md` (tokens in memory only, never `localStorage`)
+- [X] T033 [P] [US5] Create `frontend/src/context/AuthContext.jsx` + `frontend/src/components/RequireAuth.jsx` / `RequireAdmin.jsx` route guards (`.jsx` to match existing `main.jsx` skeleton)
+- [X] T034 [P] [US5] Create `frontend/src/pages/Login.jsx` (register + login forms with loading/error states)
+- [X] T035 [US5] Create `frontend/src/pages/AdminJobs.jsx` (calls `/admin/jobs`, loading/error/empty states; depends on T032)
+- [X] T036 [P] [US5] Frontend auth flow tests in `frontend/tests/` (login persistence, 401→refresh→retry, admin guard)
 
 **Checkpoint**: All user stories independently functional — web SPA consumes the same Bearer contract mobile will use
 
