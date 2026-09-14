@@ -13,8 +13,10 @@ import argparse
 import asyncio
 import os
 import sys
+from collections.abc import AsyncIterator, Callable
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import async_session
 from app.models.user import User, UserRole
@@ -22,7 +24,10 @@ from app.repositories.user_repo import UserRepository
 from app.security.passwords import hash_password
 
 
-async def seed_admin(force: bool = False) -> int:
+async def seed_admin(
+    force: bool = False,
+    session_factory: Callable[[], AsyncIterator[AsyncSession]] | None = None,
+) -> int:
     email = os.environ.get("ADMIN_EMAIL", "")
     password = os.environ.get("ADMIN_PASSWORD", "")
     if not email or not password:
@@ -34,7 +39,8 @@ async def seed_admin(force: bool = False) -> int:
         print("ADMIN_PASSWORD must be at least 8 characters", file=sys.stderr)
         return 2
 
-    async with async_session() as session:
+    factory = session_factory or async_session
+    async with factory() as session:
         repo = UserRepository(session)
         existing_admin = (
             await session.execute(

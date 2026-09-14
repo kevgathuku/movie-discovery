@@ -156,8 +156,8 @@
 - [X] T037 [P] Call `purge_expired()` on refresh-token writes (or document scheduled purge) in `backend/app/repositories/refresh_token_repo.py` usage sites — `# ponytail: in-process slowapi limiter; move to Redis when >1 API replica` comment at limiter setup in `backend/app/api/auth.py`
 - [X] T038 [P] Document `/auth/*` + `/admin/jobs` in `specs/001-movie-explorer/contracts/api.md` (or superseding note pointing at `specs/002-user-auth/contracts/`)
 - [X] T039 [P] Document `JWT_SECRET_KEY`, `CORS_ORIGINS`, `ADMIN_EMAIL`/`ADMIN_PASSWORD`, and `python -m app.seed_admin` bootstrap in `README.md`
-- [ ] T040 Run `quickstart.md` validation scenarios end-to-end (all 6 sections)
-- [ ] T041 Final gate: `uv run ruff check app/ tests/` zero errors + `uv run pytest` all green, per `AGENTS.md` checklist
+- [X] T040 Run `quickstart.md` validation scenarios end-to-end (all 6 sections)
+- [X] T041 Final gate: `uv run ruff check app/ tests/` zero errors + `uv run pytest` all green, per `AGENTS.md` checklist
 
 ---
 
