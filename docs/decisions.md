@@ -1,5 +1,11 @@
 # Architecture Decisions
 
+## 2026-09-14: Full user model with JWT auth (reverses 001 single-user assumption)
+
+**Decision**: Introduce `users` + `refresh_tokens` tables, email+password auth with short-lived JWT access tokens and single-use rotating opaque refresh tokens (header-only Bearer for web SPA and mobile), `user`/`admin` roles gating hidden `/admin/jobs` endpoints. Watchlists gain `owner_id` (existing rows backfilled to seeded admin). Libraries: `pyjwt>=2.13` (python-jose rejected — unmaintained, open CVEs), `pwdlib[argon2]` (passlib broken on 3.13+; FastAPI-recommended), `slowapi` in-process rate limiting.
+
+**Reason**: Job status tracking under an admin interface needs identity; a shared-secret stopgap would have to be ripped out later. One Bearer contract serves both the React SPA and future mobile clients (no session/cookie split). Full spec: `specs/002-user-auth/`.
+
 ## 2026-09-02: PostgreSQL for test database instead of SQLite
 
 **Decision**: Use a dedicated PostgreSQL database (`moviediscovery_test`) for tests instead of SQLite.
