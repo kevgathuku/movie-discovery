@@ -56,15 +56,15 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T015 [P] [US1] Unit tests for `AuthService` register/authenticate/mint in `backend/tests/unit/test_auth_service.py` (mocked repos via `mocker`, real `security/` helpers)
-- [ ] T016 [P] [US1] Unit tests for password/JWT helpers in `backend/tests/unit/test_security.py` (hash/verify, mint/decode, expiry, wrong-algorithm rejection)
-- [ ] T017 [P] [US1] Integration tests for register/login/me in `backend/tests/integration/api/test_auth.py` (201/200/401-generic/409/422 matrix per quickstart §2)
+- [X] T015 [P] [US1] Unit tests for `AuthService` register/authenticate/mint in `backend/tests/unit/test_auth_service.py` (mocked repos via `mocker`, real `security/` helpers)
+- [X] T016 [P] [US1] Unit tests for password/JWT helpers in `backend/tests/unit/test_security.py` (hash/verify, mint/decode, expiry, wrong-algorithm rejection)
+- [X] T017 [P] [US1] Integration tests for register/login/me in `backend/tests/integration/api/test_auth.py` (201/200/401-generic/409/422 matrix per quickstart §2)
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Create auth Pydantic schemas in `backend/app/schemas/auth.py` (`UserRegisterRequest`, `UserLoginRequest`, `TokenPairResponse`, `UserResponse`)
-- [ ] T019 [US1] Implement `register`/`authenticate`/`mint_pair` in `backend/app/services/auth_service.py` (domain exceptions only, never `HTTPException`; email normalize; generic credential failure)
-- [ ] T020 [US1] Create `backend/app/api/auth.py` with `POST /register`, `POST /login`, `GET /me` + `slowapi` limits, and wire router + new exception handlers (`UserAlreadyExistsError`→409, `InvalidCredentialsError`→401) in `backend/app/main.py`
+- [X] T018 [P] [US1] Create auth Pydantic schemas in `backend/app/schemas/auth.py` (`UserRegisterRequest`, `UserLoginRequest`, `TokenPairResponse`, `UserResponse`)
+- [X] T019 [US1] Implement `register`/`authenticate`/`mint_pair` in `backend/app/services/auth_service.py` (domain exceptions only, never `HTTPException`; email normalize; generic credential failure)
+- [X] T020 [US1] Create `backend/app/api/auth.py` with `POST /register`, `POST /login`, `GET /me` + `slowapi` limits, and wire router + new exception handlers (`UserAlreadyExistsError`→409, `InvalidCredentialsError`→401) in `backend/app/main.py`
 
 **Checkpoint**: US1 fully functional and independently testable — full auth MVP (register/login/me) without sessions management
 

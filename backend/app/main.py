@@ -5,13 +5,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.clients.tmdb_client import TMDBClient
 from app.config import settings
 from app.exceptions import (
     ExternalAPIError,
+    InvalidCredentialsError,
     MovieAlreadyExistsError,
     MovieNotFoundError,
+    UserAlreadyExistsError,
     WatchlistDuplicateError,
     WatchlistEntryNotFoundError,
     WatchlistNotFoundError,
@@ -101,6 +105,28 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.exception_handler(UserAlreadyExistsError)
+    async def user_already_exists_handler(
+        request: Request, exc: UserAlreadyExistsError
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": "Email is already registered"},
+        )
+
+    @app.exception_handler(InvalidCredentialsError)
+    async def invalid_credentials_handler(
+        request: Request, exc: InvalidCredentialsError
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid email or password"},
+        )
+
+    from app.api.auth import limiter as auth_limiter
+    from app.api.auth import router as auth_router
+    app.state.limiter = auth_limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     from app.api.jobs import router as jobs_router
     from app.api.movies import router as movies_router
     from app.api.search import router as search_router
@@ -109,6 +135,7 @@ def create_app() -> FastAPI:
     app.include_router(movies_router, prefix="/api/v1")
     app.include_router(search_router, prefix="/api/v1")
     app.include_router(watchlist_router, prefix="/api/v1")
+    app.include_router(auth_router, prefix="/api/v1")
     app.include_router(jobs_router, prefix="/api/v1")
 
     @app.get("/health")
