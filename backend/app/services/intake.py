@@ -1,7 +1,8 @@
+import asyncio
 import logging
 from datetime import date
 
-from sqlalchemy import Text, cast, or_, select
+from sqlalchemy import Text, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.tmdb_client import TMDBClient
@@ -17,11 +18,17 @@ class IntakeService:
     """Owns every path that brings TMDB data into the catalog.
 
     Callers express intent (import one, sync popular, backfill one,
-    refresh genres); TMDB payload shapes never leave this module.
+    refresh genres, refresh IMDb IDs); TMDB payload shapes never leave
+    this module.
     """
 
     # ponytail: cap so one run's backfill can't stall the scheduled job
     BACKFILL_BATCH_LIMIT = 500
+
+    # ponytail: TMDB sits ~40 req/s; 10/s max keeps 4x headroom. The
+    # IMDb-ID job caps rows per run too, so a big backlog drains safely.
+    IMDB_SYNC_BATCH_LIMIT = 40
+    IMDB_SYNC_MIN_INTERVAL = 0.1
 
     def __init__(self, db: AsyncSession, tmdb: TMDBClient) -> None:
         self.db = db
@@ -124,6 +131,36 @@ class IntakeService:
             movie.genres = names or None
             if names:
                 filled += 1
+        await self.db.flush()
+        return filled
+
+    async def sync_imdb_ids(
+        self, limit: int = IMDB_SYNC_BATCH_LIMIT, on_progress=None
+    ) -> int:
+        """Fill missing IMDb IDs, paced under the TMDB rate limit.
+
+        `on_progress` is an optional async callback taking
+        (attempted, total) for the caller to report progress.
+        """
+        total = (
+            await self.db.execute(
+                select(func.count())
+                .select_from(Movie)
+                .where(or_(Movie.imdb_id.is_(None), Movie.imdb_id == ""))
+            )
+        ).scalar() or 0
+        result = await self.db.execute(
+            select(Movie)
+            .where(or_(Movie.imdb_id.is_(None), Movie.imdb_id == ""))
+            .limit(limit)
+        )
+        filled = 0
+        for attempted, movie in enumerate(result.scalars(), 1):
+            if await self.backfill_imdb(movie):
+                filled += 1
+            await asyncio.sleep(self.IMDB_SYNC_MIN_INTERVAL)
+            if on_progress is not None:
+                await on_progress(attempted, total)
         await self.db.flush()
         return filled
 

@@ -31,3 +31,23 @@ async def test_sync_genres_backfills_json_null_rows(db_session, mocker):
     ).scalar_one()
     assert movie.genres == ["Drama"]
     assert movie.source == MovieSource.sync
+
+
+@pytest.mark.asyncio
+async def test_sync_imdb_ids_fills_missing_row(db_session, mocker):
+    db_session.add(Movie(tmdb_id=550, title="Fight Club", source=MovieSource.sync))
+    await db_session.commit()
+
+    mock_tmdb = mocker.MagicMock()
+    mock_tmdb.get_movie_details = mocker.AsyncMock(
+        return_value={"external_ids": {"imdb_id": "tt0137566"}}
+    )
+
+    filled = await IntakeService(db_session, mock_tmdb).sync_imdb_ids()
+    await db_session.commit()
+
+    assert filled == 1
+    movie = (
+        await db_session.execute(select(Movie).where(Movie.tmdb_id == 550))
+    ).scalar_one()
+    assert movie.imdb_id == "tt0137566"

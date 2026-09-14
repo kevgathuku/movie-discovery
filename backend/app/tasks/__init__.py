@@ -19,6 +19,10 @@ celery_app.conf.update(
             "task": "app.tasks.tasks.sync_popular_movies",
             "schedule": 21600.0,
         },
+        "sync-imdb-ids-every-6-hours": {
+            "task": "app.tasks.tasks.sync_imdb_ids",
+            "schedule": 21600.0,
+        },
     },
 )
 

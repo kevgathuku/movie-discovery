@@ -184,6 +184,59 @@ async def test_backfill_imdb_skips_when_set(mock_db, mock_tmdb, mocker):
 
 
 @pytest.mark.asyncio
+async def test_sync_imdb_ids_fills_missing(mock_db, mock_tmdb, mocker):
+    movie = mocker.MagicMock(spec=Movie)
+    movie.imdb_id = None
+    movie.tmdb_id = 550
+    count_result = mocker.MagicMock()
+    count_result.scalar.return_value = 1
+    rows_result = mocker.MagicMock()
+    rows_result.scalars.return_value = [movie]
+    mock_db.execute.side_effect = [count_result, rows_result]
+    mock_tmdb.get_movie_details.return_value = {
+        "external_ids": {"imdb_id": "tt0137566"}
+    }
+
+    service = IntakeService(mock_db, mock_tmdb)
+    progress = mocker.AsyncMock()
+    filled = await service.sync_imdb_ids(on_progress=progress)
+
+    assert filled == 1
+    assert movie.imdb_id == "tt0137566"
+    progress.assert_called_once_with(1, 1)
+
+
+@pytest.mark.asyncio
+async def test_sync_imdb_ids_respects_limit(mock_db, mock_tmdb, mocker):
+    movies = []
+    for tmdb_id in (550, 551):
+        movie = mocker.MagicMock(spec=Movie)
+        movie.imdb_id = None
+        movie.tmdb_id = tmdb_id
+        movies.append(movie)
+    count_result = mocker.MagicMock()
+    count_result.scalar.return_value = 2
+    rows_result = mocker.MagicMock()
+    rows_result.scalars.return_value = [movies[0]]
+    mock_db.execute.side_effect = [count_result, rows_result]
+    mock_tmdb.get_movie_details.return_value = {
+        "external_ids": {"imdb_id": "tt0137566"}
+    }
+
+    service = IntakeService(mock_db, mock_tmdb)
+    filled = await service.sync_imdb_ids(limit=1)
+
+    assert filled == 1
+    assert movies[1].imdb_id is None
+
+
+def test_imdb_sync_rate_budget():
+    """40 rows/run paced at 10/s: worst case 40 upstream calls per run."""
+    assert IntakeService.IMDB_SYNC_BATCH_LIMIT == 40
+    assert IntakeService.IMDB_SYNC_MIN_INTERVAL == 0.1
+
+
+@pytest.mark.asyncio
 async def test_sync_genres_upserts_and_backfills(mock_db, mock_tmdb, mocker):
     mock_tmdb.get_genre_map.return_value = {28: "Action"}
     mock_tmdb.get_movie_details.return_value = {
