@@ -40,3 +40,24 @@ class ExternalAPIError(Exception):
         self.service = service
         self.message = message
         super().__init__(f"External API error ({service}): {message}")
+
+
+class UserAlreadyExistsError(Exception):
+    def __init__(self, email: str) -> None:
+        self.email = email
+        super().__init__(f"User already exists: {email}")
+
+
+class InvalidCredentialsError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Invalid email or password")
+
+
+class TokenRevokedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Token has been revoked or expired")
+
+
+class NotAuthorizedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Not authorized")
