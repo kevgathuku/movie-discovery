@@ -371,6 +371,13 @@ Remove a movie from the watchlist (does not delete the movie from local database
 
 ## Jobs
 
+> **Superseded by `002-user-auth`**: the public `GET /api/v1/jobs/{job_id}` stub
+> was removed. Job tracking lives under hidden admin-only endpoints — see
+> `specs/002-user-auth/contracts/admin-jobs.md`. Auth endpoints are specified
+> in `specs/002-user-auth/contracts/auth.md`, and the shared web/mobile client
+> contract in `specs/002-user-auth/contracts/client-auth.md`. Watchlists now
+> require authentication and are scoped per user.
+
 ### GET /api/v1/jobs/{job_id}
 
 Check the status of a background job (e.g., trending sync, import).
@@ -411,5 +418,9 @@ The API layer maps domain exceptions (Principle XX) to HTTP status codes:
 | `WatchlistEntryNotFoundError` | 404 |
 | `WatchlistDuplicateError` | 409 |
 | `JobNotFoundError` | 404 |
+| `UserAlreadyExistsError` | 409 |
+| `InvalidCredentialsError` | 401 |
+| `TokenRevokedError` | 401 |
+| `NotAuthorizedError` | 403 |
 | `ExternalAPIError` | 502 |
 | `ValidationError` | 422 |
