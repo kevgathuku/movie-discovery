@@ -4,17 +4,17 @@ Revision ID: e40b4a4c320c
 Revises: fa552d8fed5f
 Create Date: 2026-09-14 12:31:19.220629
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'e40b4a4c320c'
-down_revision: Union[str, None] = 'fa552d8fed5f'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = 'fa552d8fed5f'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -25,12 +25,15 @@ def upgrade() -> None:
     sa.Column('password_hash', sa.String(length=255), nullable=False),
     sa.Column('role', sa.Enum('user', 'admin', name='userrole'), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index('ix_users_role', 'users', ['role'], unique=False)
-    op.create_index('uq_users_email_lower', 'users', [sa.text('lower(email)')], unique=True)
+    op.create_index('uq_users_email_lower', 'users', [sa.text('lower(email)')],
+                    unique=True)
     op.create_table('refresh_tokens',
     sa.Column('jti', sa.Uuid(), nullable=False),
     sa.Column('user_id', sa.BigInteger(), nullable=False),
@@ -38,16 +41,21 @@ def upgrade() -> None:
     sa.Column('token_hash', sa.String(length=64), nullable=False),
     sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('jti'),
     sa.UniqueConstraint('token_hash')
     )
-    op.create_index('ix_refresh_tokens_family_id', 'refresh_tokens', ['family_id'], unique=False)
-    op.create_index('ix_refresh_tokens_user_id', 'refresh_tokens', ['user_id'], unique=False)
+    op.create_index('ix_refresh_tokens_family_id', 'refresh_tokens', ['family_id'],
+                    unique=False)
+    op.create_index('ix_refresh_tokens_user_id', 'refresh_tokens', ['user_id'],
+                    unique=False)
     op.add_column('watchlists', sa.Column('owner_id', sa.BigInteger(), nullable=True))
-    op.create_index(op.f('ix_watchlists_owner_id'), 'watchlists', ['owner_id'], unique=False)
-    op.create_foreign_key(None, 'watchlists', 'users', ['owner_id'], ['id'], ondelete='CASCADE')
+    op.create_index(op.f('ix_watchlists_owner_id'), 'watchlists', ['owner_id'],
+                    unique=False)
+    op.create_foreign_key(None, 'watchlists', 'users', ['owner_id'], ['id'],
+                          ondelete='CASCADE')
     # ### end Alembic commands ###
 
 

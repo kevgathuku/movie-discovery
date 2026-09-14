@@ -1,16 +1,42 @@
 import os
 
+
+def _load_repo_env():
+    # Host runs need localhost:5433 URLs from the repo-root .env (the
+    # defaults below only resolve inside Docker). Explicit env wins.
+    if "TEST_DATABASE_URL" in os.environ and "ADMIN_DATABASE_URL" in os.environ:
+        return
+    env_file = os.path.join(
+        os.path.dirname(__file__), "..", "..", ".env"
+    )
+    try:
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+    except OSError:
+        pass
+
+
+_load_repo_env()
+
 os.environ.setdefault("TMDB_API_KEY", "test-api-key")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest-only-32c")
 
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+import pytest  # noqa: E402 (imports must follow env setup above)
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
-from app.dependencies import get_db
-from app.models.base import Base
+from app.dependencies import get_db  # noqa: E402
+from app.models.base import Base  # noqa: E402
 
 TEST_DB_URL = os.environ.get(
     "TEST_DATABASE_URL",

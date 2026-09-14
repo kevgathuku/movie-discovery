@@ -4,17 +4,17 @@ Revision ID: e9666efb6bf6
 Revises: e40b4a4c320c
 Create Date: 2026-09-14 12:31:50.257025
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'e9666efb6bf6'
-down_revision: Union[str, None] = 'e40b4a4c320c'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = 'e40b4a4c320c'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
