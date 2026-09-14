@@ -66,6 +66,15 @@ async def admin_user(db_session):
     return user
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    # slowapi buckets are process-global; reset per test so login/register
+    # limits don't leak across tests (limits still enforced within a test).
+    from app.api.auth import limiter
+
+    limiter.reset()
+
+
 @pytest.fixture
 async def client(db_session, mocker):
     from app.main import create_app

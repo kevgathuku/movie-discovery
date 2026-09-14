@@ -15,6 +15,7 @@ from app.exceptions import (
     InvalidCredentialsError,
     MovieAlreadyExistsError,
     MovieNotFoundError,
+    TokenRevokedError,
     UserAlreadyExistsError,
     WatchlistDuplicateError,
     WatchlistEntryNotFoundError,
@@ -121,6 +122,13 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"detail": "Invalid email or password"},
+        )
+
+    @app.exception_handler(TokenRevokedError)
+    async def token_revoked_handler(request: Request, exc: TokenRevokedError):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Invalid or expired token"},
         )
 
     from app.api.auth import limiter as auth_limiter

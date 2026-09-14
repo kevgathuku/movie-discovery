@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -18,6 +19,8 @@ from app.security.tokens import (
     mint_access_token,
     new_refresh_token,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -67,3 +70,46 @@ class AuthService:
         if expires_at <= datetime.now(UTC):
             raise TokenRevokedError()
         return record
+
+    async def rotate_refresh(
+        self, refresh_token: str
+    ) -> tuple[User, str, str]:
+        """Single-use rotation. Reuse of a spent token revokes the family."""
+        record = await self.tokens.get_by_hash(hash_token(refresh_token))
+        if record is None:
+            raise TokenRevokedError()
+        if record.revoked_at is not None:
+            await self.tokens.revoke_family(record.family_id)
+            logger.warning(
+                "Refresh token reuse detected for user %d; family revoked",
+                record.user_id,
+            )
+            raise TokenRevokedError()
+        expires_at = record.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+        if expires_at <= datetime.now(UTC):
+            raise TokenRevokedError()
+        user = await self.users.get_by_id(record.user_id)
+        if user is None or not user.is_active:
+            raise TokenRevokedError()
+
+        await self.tokens.revoke(record)
+        access = mint_access_token(user.id, user.role.value)
+        new_refresh, token_hash = new_refresh_token()
+        await self.tokens.store(
+            user_id=user.id,
+            family_id=record.family_id,
+            token_hash=token_hash,
+            expires_at=datetime.now(UTC)
+            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        )
+        return user, access, new_refresh
+
+    async def logout(self, refresh_token: str) -> None:
+        record = await self.tokens.get_by_hash(hash_token(refresh_token))
+        if record is not None and record.revoked_at is None:
+            await self.tokens.revoke(record)
+
+    async def logout_all(self, user: User) -> int:
+        return await self.tokens.revoke_all_for_user(user.id)

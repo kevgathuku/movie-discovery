@@ -5,9 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.dependencies import get_current_user, get_db
-from app.exceptions import InvalidCredentialsError, UserAlreadyExistsError
+from app.exceptions import (
+    InvalidCredentialsError,
+    TokenRevokedError,
+    UserAlreadyExistsError,
+)
 from app.models.user import User
 from app.schemas.auth import (
+    RefreshRequest,
     TokenPairResponse,
     UserLoginRequest,
     UserRegisterRequest,
@@ -75,3 +80,44 @@ async def login(
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: User = Depends(get_current_user)):
     return UserResponse.model_validate(current_user)
+
+
+@router.post("/refresh", response_model=TokenPairResponse)
+@limiter.limit("10/minute")
+async def refresh(
+    request: Request,
+    body: RefreshRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        _, access, new_refresh = await AuthService(db).rotate_refresh(
+            body.refresh_token
+        )
+    except TokenRevokedError as e:
+        # Persist family revocation from reuse detection before responding.
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token",
+        ) from e
+    await db.commit()
+    return _token_pair(access, new_refresh)
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    body: RefreshRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await AuthService(db).logout(body.refresh_token)
+    await db.commit()
+
+
+@router.post("/logout-all", status_code=status.HTTP_204_NO_CONTENT)
+async def logout_all(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await AuthService(db).logout_all(current_user)
+    await db.commit()

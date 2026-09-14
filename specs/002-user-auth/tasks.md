@@ -80,13 +80,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T021 [P] [US2] Token security tests (rotation, reuse-revokes-family, logout, logout-all, expiry) in `backend/tests/unit/test_token_security.py`
-- [ ] T022 [P] [US2] Integration tests for refresh/logout/logout-all flow in `backend/tests/integration/api/test_auth_refresh.py`
+- [X] T021 [P] [US2] Token security tests (rotation, reuse-revokes-family, logout, logout-all, expiry) in `backend/tests/unit/test_token_security.py`
+- [X] T022 [P] [US2] Integration tests for refresh/logout/logout-all flow in `backend/tests/integration/api/test_auth_refresh.py`
 
 ### Implementation for User Story 2
 
-- [ ] T023 [US2] Add `rotate_refresh` (single-use + `family_id` reuse detection → revoke family), `logout`, `logout_all` to `backend/app/services/auth_service.py`, extending `backend/app/schemas/auth.py` (`RefreshRequest`)
-- [ ] T024 [US2] Add `POST /refresh`, `POST /logout`, `POST /logout-all` with `slowapi` limits to `backend/app/api/auth.py` (reuse event logged as security warning with `user_id`, never the token)
+- [X] T023 [US2] Add `rotate_refresh` (single-use + `family_id` reuse detection → revoke family), `logout`, `logout_all` to `backend/app/services/auth_service.py`, extending `backend/app/schemas/auth.py` (`RefreshRequest`)
+- [X] T024 [US2] Add `POST /refresh`, `POST /logout`, `POST /logout-all` with `slowapi` limits to `backend/app/api/auth.py` (reuse event logged as security warning with `user_id`, never the token)
 
 **Checkpoint**: US1 + US2 deliver the complete backend auth slice — independently valuable to any client (web, mobile, CLI)
 
