@@ -243,3 +243,14 @@ Task: "T030 Wire admin router + delete jobs stub in main.py"
 - Deploy-time migration order is load-bearing: rev A (nullable column) → run `seed_admin` → rev B (backfill + NOT NULL)
 - `main.py` is touched by T020, T030, T031 — keep each edit a small append; do not parallelize those three
 - Commit after each task or logical group; `uv lock` after any `pyproject.toml` change
+
+---
+
+## Phase 9: Convergence
+
+**Purpose**: Close gaps found by `/speckit.converge` assessment of code vs spec/plan/tasks (3 findings, all MEDIUM/partial; no CRITICAL/HIGH)
+
+- [X] T042 Harden `rotate_refresh` in `backend/app/services/auth_service.py` against concurrent reuse per spec edge case (two simultaneous refreshes → exactly one succeeds) (`partial`)
+- [X] T043 Add regression test for concurrent refresh-rotation in `backend/tests/unit/test_token_security.py` or `backend/tests/integration/api/test_auth_refresh.py` proving single-winner + family revocation (`partial`)
+- [X] T044 Add frontend route-guard tests in `frontend/tests/` per T036/US5 AC1+AC4: reload persistence, `Protected`/`LoginRoute` redirects, admin guard wiring (add `jsdom` + Testing Library to `frontend/package.json` if needed) (`partial`)
+- [X] T045 Move admin job list query out of `list_jobs` in `backend/app/api/admin_jobs.py` into `JobRepository` per plan constitution gate (II/VI thin-route delegation) (`partial`)
