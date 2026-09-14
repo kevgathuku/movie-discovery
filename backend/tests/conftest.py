@@ -76,6 +76,17 @@ async def db_session():
     await engine.dispose()
 
 
+@pytest.fixture
+async def session_factory():
+    """Independent session factory on the test DB (concurrency tests)."""
+    engine = create_async_engine(TEST_DB_URL)
+    factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    yield factory
+    await engine.dispose()
+
+
 @pytest.fixture(autouse=True)
 def _reset_rate_limits():
     # slowapi buckets are process-global; reset per test so login/register

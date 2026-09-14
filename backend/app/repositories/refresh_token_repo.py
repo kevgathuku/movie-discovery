@@ -28,10 +28,17 @@ class RefreshTokenRepository:
         await self.session.flush()
         return record
 
-    async def get_by_hash(self, token_hash: str) -> RefreshToken | None:
-        result = await self.session.execute(
-            select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    async def get_by_hash(
+        self, token_hash: str, for_update: bool = False
+    ) -> RefreshToken | None:
+        query = select(RefreshToken).where(
+            RefreshToken.token_hash == token_hash
         )
+        if for_update:
+            # Serializes concurrent rotations of the same token: the loser
+            # blocks until the winner commits, then sees the revoked record.
+            query = query.with_for_update()
+        result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
     async def revoke(self, record: RefreshToken) -> None:

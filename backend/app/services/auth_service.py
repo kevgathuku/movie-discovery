@@ -61,22 +61,15 @@ class AuthService:
         await self.tokens.purge_expired()
         return access, refresh
 
-    async def _live_refresh_record(self, refresh_token: str):
-        record = await self.tokens.get_by_hash(hash_token(refresh_token))
-        if record is None or record.revoked_at is not None:
-            raise TokenRevokedError()
-        expires_at = record.expires_at
-        if expires_at.tzinfo is None:
-            expires_at = expires_at.replace(tzinfo=UTC)
-        if expires_at <= datetime.now(UTC):
-            raise TokenRevokedError()
-        return record
-
     async def rotate_refresh(
         self, refresh_token: str
     ) -> tuple[User, str, str]:
         """Single-use rotation. Reuse of a spent token revokes the family."""
-        record = await self.tokens.get_by_hash(hash_token(refresh_token))
+        # FOR UPDATE: concurrent rotations of the same token serialize here.
+        # The loser blocks until the winner commits, then sees revoked_at set.
+        record = await self.tokens.get_by_hash(
+            hash_token(refresh_token), for_update=True
+        )
         if record is None:
             raise TokenRevokedError()
         if record.revoked_at is not None:
