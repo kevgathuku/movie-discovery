@@ -119,12 +119,12 @@
 
 ### Tests for User Story 4
 
-- [ ] T028 [P] [US4] Admin gate matrix tests in `backend/tests/integration/api/test_admin_jobs.py` (401/403/200/404 + OpenAPI-hidden assertion + public-stub-gone assertion)
+- [X] T028 [P] [US4] Admin gate matrix tests in `backend/tests/integration/api/test_admin_jobs.py` (401/403/200/404 + OpenAPI-hidden assertion + public-stub-gone assertion)
 
 ### Implementation for User Story 4
 
-- [ ] T029 [US4] Create `backend/app/api/admin_jobs.py` — `APIRouter(prefix="/admin/jobs", dependencies=[Depends(require_admin)], include_in_schema=False)` with `GET /` (status/job_type filters, pagination, newest first) and `GET /{job_id}`, reusing `JobRepository` + `JobResponse`
-- [ ] T030 [US4] Edit `backend/app/main.py` — mount `admin_jobs` router, add `JobNotFoundError`→404 handler, remove `jobs_router` import/mount; delete `backend/app/api/jobs.py`
+- [X] T029 [US4] Create `backend/app/api/admin_jobs.py` — `APIRouter(prefix="/admin/jobs", dependencies=[Depends(require_admin)], include_in_schema=False)` with `GET /` (status/job_type filters, pagination, newest first) and `GET /{job_id}`, reusing `JobRepository` + `JobResponse`
+- [X] T030 [US4] Edit `backend/app/main.py` — mount `admin_jobs` router, add `JobNotFoundError`→404 handler, remove `jobs_router` import/mount; delete `backend/app/api/jobs.py`
 
 **Checkpoint**: US4 working — original motivation delivered; parallel-safe with US2/US3 (different files) once US1 is done
 

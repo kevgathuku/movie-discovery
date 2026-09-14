@@ -47,7 +47,6 @@ async def test_list_watchlists_response_shape(client, make_user_headers):
 
 
 async def test_get_job_not_found(client):
+    # Public jobs stub removed in 002-user-auth US4; jobs live under /admin.
     response = await client.get("/api/v1/jobs/nonexistent")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["detail"] == "Not implemented yet"
+    assert response.status_code == 404

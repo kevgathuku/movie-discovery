@@ -13,6 +13,7 @@ from app.config import settings
 from app.exceptions import (
     ExternalAPIError,
     InvalidCredentialsError,
+    JobNotFoundError,
     MovieAlreadyExistsError,
     MovieNotFoundError,
     TokenRevokedError,
@@ -131,11 +132,18 @@ def create_app() -> FastAPI:
             content={"detail": "Invalid or expired token"},
         )
 
+    @app.exception_handler(JobNotFoundError)
+    async def job_not_found_handler(request: Request, exc: JobNotFoundError):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": str(exc)},
+        )
+
+    from app.api.admin_jobs import router as admin_jobs_router
     from app.api.auth import limiter as auth_limiter
     from app.api.auth import router as auth_router
     app.state.limiter = auth_limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-    from app.api.jobs import router as jobs_router
     from app.api.movies import router as movies_router
     from app.api.search import router as search_router
     from app.api.watchlist import router as watchlist_router
@@ -144,7 +152,7 @@ def create_app() -> FastAPI:
     app.include_router(search_router, prefix="/api/v1")
     app.include_router(watchlist_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
-    app.include_router(jobs_router, prefix="/api/v1")
+    app.include_router(admin_jobs_router)
 
     @app.get("/health")
     async def health() -> dict[str, str]:
