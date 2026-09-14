@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Index, String, func
+from sqlalchemy import BigInteger, Boolean, DateTime, Index, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -32,7 +32,9 @@ class User(Base):
 
     __table_args__ = (
         # Case-insensitive uniqueness without the citext extension; the app
-        # also normalizes (strip + lower) before lookup.
-        Index("uq_users_email_lower", func.lower("email"), unique=True),
+        # also normalizes (strip + lower) before lookup. text() (not
+        # func.lower("email")) so create_all renders lower(email), not the
+        # literal lower('email').
+        Index("uq_users_email_lower", text("lower(email)"), unique=True),
         Index("ix_users_role", "role"),
     )

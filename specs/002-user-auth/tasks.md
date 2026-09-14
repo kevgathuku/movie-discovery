@@ -100,12 +100,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T025 [P] [US3] Cross-user isolation integration tests in `backend/tests/integration/api/test_watchlist_isolation.py` (create-as-A/read-as-B→404, list scoping, entry-level scoping, anonymous→401)
+- [X] T025 [P] [US3] Cross-user isolation integration tests in `backend/tests/integration/api/test_watchlist_isolation.py` (create-as-A/read-as-B→404, list scoping, entry-level scoping, anonymous→401)
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Scope every `WatchlistService` method by `owner_id` in `backend/app/services/watchlist_service.py` (constructor takes `owner_id`; all queries filter `(id, owner_id)`)
-- [ ] T027 [US3] Gate `backend/app/api/watchlist.py` with `Depends(get_current_user)` and pass `current_user.id` as `owner_id` into the service
+- [X] T026 [US3] Scope every `WatchlistService` method by `owner_id` in `backend/app/services/watchlist_service.py` (constructor takes `owner_id`; all queries filter `(id, owner_id)`)
+- [X] T027 [US3] Gate `backend/app/api/watchlist.py` with `Depends(get_current_user)` and pass `current_user.id` as `owner_id` into the service
 
 **Checkpoint**: US3 working — per-user data isolation proven; can run in parallel with US2/US4 (different files) once US1 is done
 

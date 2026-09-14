@@ -36,9 +36,10 @@ async def test_search_empty_query(client):
     assert "suggestion" in data
 
 
-async def test_list_watchlists_response_shape(client, admin_user):
+async def test_list_watchlists_response_shape(client, make_user_headers):
     """Watchlists response must contain the list envelope."""
-    response = await client.get("/api/v1/watchlists")
+    headers = await make_user_headers("owner@example.com")
+    response = await client.get("/api/v1/watchlists", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert "watchlists" in data
