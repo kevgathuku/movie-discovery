@@ -16,6 +16,9 @@ dependencies = [
     "redis>=5.0",
     "sqids>=0.4",
     "uvicorn[standard]>=0.34",
+    "pyjwt>=2.13",
+    "pwdlib[argon2]>=0.2",
+    "slowapi>=0.1",
 ]
 
 [project.optional-dependencies]
