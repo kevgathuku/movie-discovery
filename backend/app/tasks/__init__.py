@@ -15,8 +15,8 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     beat_schedule={
-        "sync-trending-every-6-hours": {
-            "task": "app.tasks.tasks.sync_trending_movies",
+        "sync-popular-every-6-hours": {
+            "task": "app.tasks.tasks.sync_popular_movies",
             "schedule": 21600.0,
         },
     },

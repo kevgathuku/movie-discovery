@@ -94,11 +94,11 @@ async def test_add_to_watchlist_duplicate_raises(mock_db, mocker):
         await service.add_to_watchlist(watchlist_id=1, movie_id=100)
 
 
-# --- mark_watched: timestamp side effect ---
+# --- update_status: timestamp side effect ---
 
 
 @pytest.mark.asyncio
-async def test_mark_watched_sets_timestamp(mock_db, mocker):
+async def test_update_status_watched_sets_timestamp(mock_db, mocker):
     """Verify watched_at is populated when marking as watched."""
     mock_entry = mocker.MagicMock(spec=WatchlistEntry)
     mock_entry.status = WatchlistStatus.to_watch
@@ -106,19 +106,33 @@ async def test_mark_watched_sets_timestamp(mock_db, mocker):
     mock_db.execute.return_value = _mock_scalar_result(mocker, mock_entry)
 
     service = WatchlistService(mock_db, owner_id=1)
-    result = await service.mark_watched(entry_id=1)
+    result = await service.update_status(entry_id=1, status=WatchlistStatus.watched)
 
     assert result.status == WatchlistStatus.watched
     assert result.watched_at is not None
 
 
 @pytest.mark.asyncio
-async def test_mark_watched_not_found(mock_db, mocker):
+async def test_update_status_to_watch_clears_timestamp(mock_db, mocker):
+    """Verify watched_at is cleared when marking back to to_watch."""
+    mock_entry = mocker.MagicMock(spec=WatchlistEntry)
+    mock_entry.status = WatchlistStatus.watched
+    mock_db.execute.return_value = _mock_scalar_result(mocker, mock_entry)
+
+    service = WatchlistService(mock_db, owner_id=1)
+    result = await service.update_status(entry_id=1, status=WatchlistStatus.to_watch)
+
+    assert result.status == WatchlistStatus.to_watch
+    assert result.watched_at is None
+
+
+@pytest.mark.asyncio
+async def test_update_status_not_found(mock_db, mocker):
     mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
     service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(WatchlistEntryNotFoundError):
-        await service.mark_watched(entry_id=999)
+        await service.update_status(entry_id=999, status=WatchlistStatus.watched)
 
 
 # --- remove_from_watchlist: error path ---

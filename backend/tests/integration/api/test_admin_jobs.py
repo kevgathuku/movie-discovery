@@ -26,7 +26,7 @@ async def user_headers(client, make_user_headers):
 
 @pytest.fixture
 async def sample_job(db_session):
-    job = Job(id="Xb3nK9", job_type="sync_trending", status=JobStatus.completed,
+    job = Job(id="Xb3nK9", job_type="sync_popular", status=JobStatus.completed,
               progress=100)
     db_session.add(job)
     await db_session.commit()
@@ -84,7 +84,7 @@ async def test_admin_get_job_detail(client, admin_headers, sample_job):
     )
 
     assert response.status_code == 200
-    assert response.json()["job_type"] == "sync_trending"
+    assert response.json()["job_type"] == "sync_popular"
 
 
 @pytest.mark.asyncio

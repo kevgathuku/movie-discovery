@@ -143,13 +143,18 @@ class WatchlistService:
             raise WatchlistEntryNotFoundError(entry_id)
         return entry
 
-    async def mark_watched(self, entry_id: int) -> WatchlistEntry:
+    async def update_status(
+        self, entry_id: int, status: WatchlistStatus
+    ) -> WatchlistEntry:
         entry = await self._get_entry(entry_id)
 
-        entry.status = WatchlistStatus.watched
-        entry.watched_at = datetime.now(UTC)
+        entry.status = status
+        if status == WatchlistStatus.watched:
+            entry.watched_at = datetime.now(UTC)
+        else:
+            entry.watched_at = None
         await self.db.flush()
-        logger.info("Marked entry %d as watched", entry_id)
+        logger.info("Set entry %d status to %s", entry_id, status)
         return entry
 
     async def remove_from_watchlist(self, entry_id: int) -> None:

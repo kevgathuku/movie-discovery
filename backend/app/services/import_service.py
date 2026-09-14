@@ -64,7 +64,7 @@ class ImportService:
             ] or None,
             rating=tmdb_data.get("vote_average"),
             poster_url=self.tmdb.get_poster_url(poster_path),
-            source=MovieSource.sync,
+            source=MovieSource.manual,
         )
 
         self.db.add(movie)

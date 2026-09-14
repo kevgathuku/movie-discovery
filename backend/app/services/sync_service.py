@@ -16,12 +16,12 @@ class SyncService:
         self.repo = MovieRepository(session)
         self.tmdb = tmdb_client
 
-    async def sync_trending(self) -> list[Movie]:
+    async def sync_popular(self) -> list[Movie]:
         try:
             data = await self.tmdb._request("GET", "/movie/popular")
             results = data.get("results", [])
         except ExternalAPIError:
-            logger.exception("Failed to fetch trending movies from TMDB")
+            logger.exception("Failed to fetch popular movies from TMDB")
             raise
 
         movies = []

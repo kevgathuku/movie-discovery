@@ -61,7 +61,7 @@ async def test_import_movie_persists_to_database(client, db_session, mocker):
     assert movie is not None
     assert movie.title == "Fight Club"
     assert movie.imdb_id == "tt0137566"
-    assert movie.source.value == "sync"
+    assert movie.source.value == "manual"
 
 
 @pytest.mark.asyncio

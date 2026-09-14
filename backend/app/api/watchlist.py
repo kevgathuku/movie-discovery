@@ -175,7 +175,7 @@ async def update_watchlist_entry(
 ):
     service = WatchlistService(db, current_user.id)
     try:
-        entry = await service.mark_watched(entry_id)
+        entry = await service.update_status(entry_id, request.status)
         await db.commit()
         return WatchlistEntryResponse.model_validate(entry)
     except WatchlistEntryNotFoundError as e:

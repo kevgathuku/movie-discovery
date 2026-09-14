@@ -22,7 +22,7 @@ class Movie(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     release_date: Mapped[date | None] = mapped_column(nullable=True)
     synopsis: Mapped[str | None] = mapped_column(Text, nullable=True)
-    genres: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    genres: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     rating: Mapped[float | None] = mapped_column(Float, nullable=True)
     poster_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     source: Mapped[MovieSource] = mapped_column(

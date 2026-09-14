@@ -236,6 +236,28 @@ async def test_mark_watched_not_found(client, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_unwatch_clears_watched_at(client, auth_headers, watchlist_with_entry):
+    entry_id = watchlist_with_entry["id"]
+    watched = await client.patch(
+        f"/api/v1/watchlists/1/entries/{entry_id}",
+        json={"status": "watched"},
+        headers=auth_headers,
+    )
+    assert watched.json()["watched_at"] is not None
+
+    response = await client.patch(
+        f"/api/v1/watchlists/1/entries/{entry_id}",
+        json={"status": "to_watch"},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "to_watch"
+    assert data["watched_at"] is None
+
+
+@pytest.mark.asyncio
 async def test_remove_from_watchlist_not_found(
     client, auth_headers, sample_watchlist
 ):

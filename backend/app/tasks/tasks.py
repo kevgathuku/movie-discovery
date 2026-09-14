@@ -5,8 +5,8 @@ from celery import shared_task
 logger = logging.getLogger(__name__)
 
 
-@shared_task(name="app.tasks.tasks.sync_trending_movies")
-def sync_trending_movies() -> str:
+@shared_task(name="app.tasks.tasks.sync_popular_movies")
+def sync_popular_movies() -> str:
     import asyncio
 
     from app.clients.tmdb_client import TMDBClient
@@ -21,7 +21,7 @@ def sync_trending_movies() -> str:
         try:
             async with async_session() as session:
                 job_repo = JobRepository(session)
-                job = await job_repo.create("sync_trending")
+                job = await job_repo.create("sync_popular")
                 await session.commit()
 
                 try:
@@ -29,14 +29,14 @@ def sync_trending_movies() -> str:
                     await session.commit()
 
                     service = SyncService(session, tmdb_client)
-                    movies = await service.sync_trending()
+                    movies = await service.sync_popular()
 
                     await job_repo.update_status(
                         job, JobStatus.completed, progress=100
                     )
                     await session.commit()
 
-                    return f"Synced {len(movies)} trending movies"
+                    return f"Synced {len(movies)} popular movies"
                 except Exception as e:
                     await job_repo.update_status(
                         job,
