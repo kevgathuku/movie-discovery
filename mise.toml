@@ -1,2 +1,3 @@
 [tools]
 python = "latest"
+node = "22"

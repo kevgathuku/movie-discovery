@@ -6,7 +6,7 @@ see `specs/002-user-auth/contracts/client-auth.md`).
 
 ## Requirements
 
-- **Node 20+** (`node --version`). The Docker build uses `node:20-alpine`.
+- **Node 22.23.2+** (`node --version`; pinned via `mise.toml`). The Docker build uses `node:22-alpine`.
 - **Backend running** at `http://localhost:8000`
   (`docker compose up -d` from the repo root, plus `TMDB_API_KEY` in `.env`).
 - An **admin user** if you want to see the Admin jobs view:
