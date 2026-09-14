@@ -2,6 +2,7 @@ import os
 
 os.environ.setdefault("TMDB_API_KEY", "test-api-key")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest-only-32c")
 
 import pytest
 from httpx import ASGITransport, AsyncClient
