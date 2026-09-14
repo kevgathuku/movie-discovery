@@ -56,6 +56,14 @@ class TMDBClient:
             return None
         return results[0]
 
+    async def get_popular(self) -> list[dict]:
+        data = await self._request("GET", "/movie/popular")
+        return data.get("results", [])
+
+    async def get_genre_map(self) -> dict[int, str]:
+        data = await self._request("GET", "/genre/movie/list")
+        return {g["id"]: g["name"] for g in data.get("genres", [])}
+
     async def get_movie_credits(self, movie_id: int) -> dict:
         return await self._request("GET", f"/movie/{movie_id}/credits")
 

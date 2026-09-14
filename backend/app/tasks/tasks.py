@@ -14,7 +14,7 @@ def sync_popular_movies() -> str:
     from app.dependencies import async_session
     from app.models.job import JobStatus
     from app.repositories.job_repo import JobRepository
-    from app.services.sync_service import SyncService
+    from app.services.intake import IntakeService
 
     async def _sync():
         tmdb_client = TMDBClient(api_key=settings.TMDB_API_KEY)
@@ -28,7 +28,8 @@ def sync_popular_movies() -> str:
                     await job_repo.update_status(job, JobStatus.processing)
                     await session.commit()
 
-                    service = SyncService(session, tmdb_client)
+                    service = IntakeService(session, tmdb_client)
+                    filled = await service.sync_genres()
                     movies = await service.sync_popular()
 
                     await job_repo.update_status(
@@ -36,7 +37,10 @@ def sync_popular_movies() -> str:
                     )
                     await session.commit()
 
-                    return f"Synced {len(movies)} popular movies"
+                    return (
+                        f"Synced {len(movies)} popular movies "
+                        f"({filled} genre backfills)"
+                    )
                 except Exception as e:
                     await job_repo.update_status(
                         job,

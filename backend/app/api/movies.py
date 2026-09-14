@@ -17,7 +17,7 @@ from app.schemas.movie import (
     MovieListResponse,
     PaginatedMovieResponse,
 )
-from app.services.import_service import ImportService
+from app.services.intake import IntakeService
 from app.services.movie_service import MovieService
 
 logger = logging.getLogger(__name__)
@@ -55,19 +55,14 @@ async def get_movie(
             detail="Movie not found",
         )
 
-    if not movie.imdb_id:
-        try:
-            details = await tmdb_client.get_movie_details(movie.tmdb_id)
-            external_ids = details.get("external_ids", {})
-            imdb_id = external_ids.get("imdb_id")
-            if imdb_id:
-                movie.imdb_id = imdb_id
-                await db.commit()
-                await db.refresh(movie)
-        except ExternalAPIError:
-            logger.warning(
-                "Failed to fetch external IDs for movie %d", movie.tmdb_id
-            )
+    try:
+        if await IntakeService(db, tmdb_client).backfill_imdb(movie):
+            await db.commit()
+            await db.refresh(movie)
+    except ExternalAPIError:
+        logger.warning(
+            "Failed to fetch external IDs for movie %d", movie.tmdb_id
+        )
 
     return MovieDetailResponse.model_validate(movie)
 
@@ -95,9 +90,9 @@ async def import_movie(
             detail=f"Invalid IMDB ID format: {imdb_id}. Must be like tt0137566",
         )
 
-    service = ImportService(db, tmdb_client)
+    service = IntakeService(db, tmdb_client)
     try:
-        movie = await service.import_movie_by_imdb(imdb_id)
+        movie = await service.import_by_imdb(imdb_id)
         await db.commit()
         return MovieDetailResponse.model_validate(movie)
     except MovieAlreadyExistsError as e:
