@@ -58,10 +58,12 @@ async def test_rotate_issues_new_pair_same_family(service, mocker):
     )
     revoke = mocker.patch.object(service.tokens, "revoke")
     store = mocker.patch.object(service.tokens, "store")
+    purge = mocker.patch.object(service.tokens, "purge_expired")
 
     user, access, refresh = await service.rotate_refresh("OLD")
 
     revoke.assert_called_once_with(old)
+    purge.assert_called_once()
     assert store.call_args.kwargs["family_id"] == old.family_id
     assert user.id == 1 and access and refresh
 

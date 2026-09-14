@@ -128,12 +128,14 @@ async def test_authenticate_inactive_user_raises(service, mocker):
 @pytest.mark.asyncio
 async def test_issue_pair_stores_hashed_refresh(service, mocker):
     store_mock = mocker.patch.object(service.tokens, "store")
+    purge_mock = mocker.patch.object(service.tokens, "purge_expired")
     user = _user()
 
     access, refresh = await service.issue_pair(user)
 
     assert access and refresh and access != refresh
     store_mock.assert_called_once()
+    purge_mock.assert_called_once()
     _, kwargs = store_mock.call_args
     assert kwargs["user_id"] == 1
     assert isinstance(kwargs["family_id"], uuid.UUID)

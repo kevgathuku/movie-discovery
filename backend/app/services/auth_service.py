@@ -58,6 +58,7 @@ class AuthService:
             expires_at=datetime.now(UTC)
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
+        await self.tokens.purge_expired()
         return access, refresh
 
     async def _live_refresh_record(self, refresh_token: str):
@@ -104,6 +105,7 @@ class AuthService:
             expires_at=datetime.now(UTC)
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         )
+        await self.tokens.purge_expired()
         return user, access, new_refresh
 
     async def logout(self, refresh_token: str) -> None:
