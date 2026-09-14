@@ -46,7 +46,7 @@ async def test_add_to_watchlist_sets_default_status(mock_db, mocker):
     ]
     mock_db.get.return_value = mock_movie  # movie_repo.get_by_id
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     result = await service.add_to_watchlist(watchlist_id=1, movie_id=100)
 
     assert result.watchlist_id == 1
@@ -58,7 +58,7 @@ async def test_add_to_watchlist_sets_default_status(mock_db, mocker):
 async def test_add_to_watchlist_watchlist_not_found(mock_db, mocker):
     mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(WatchlistNotFoundError):
         await service.add_to_watchlist(watchlist_id=999, movie_id=100)
 
@@ -70,7 +70,7 @@ async def test_add_to_watchlist_movie_not_found(mock_db, mocker):
     )
     mock_db.get.return_value = None  # movie_repo.get_by_id returns None
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(MovieNotFoundError):
         await service.add_to_watchlist(watchlist_id=1, movie_id=999)
 
@@ -89,7 +89,7 @@ async def test_add_to_watchlist_duplicate_raises(mock_db, mocker):
     ]
     mock_db.get.return_value = mock_movie  # movie_repo.get_by_id
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(WatchlistDuplicateError):
         await service.add_to_watchlist(watchlist_id=1, movie_id=100)
 
@@ -105,7 +105,7 @@ async def test_mark_watched_sets_timestamp(mock_db, mocker):
     mock_entry.watched_at = None
     mock_db.execute.return_value = _mock_scalar_result(mocker, mock_entry)
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     result = await service.mark_watched(entry_id=1)
 
     assert result.status == WatchlistStatus.watched
@@ -116,7 +116,7 @@ async def test_mark_watched_sets_timestamp(mock_db, mocker):
 async def test_mark_watched_not_found(mock_db, mocker):
     mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(WatchlistEntryNotFoundError):
         await service.mark_watched(entry_id=999)
 
@@ -128,6 +128,6 @@ async def test_mark_watched_not_found(mock_db, mocker):
 async def test_remove_from_watchlist_not_found(mock_db, mocker):
     mock_db.execute.return_value = _mock_scalar_result(mocker, None)
 
-    service = WatchlistService(mock_db)
+    service = WatchlistService(mock_db, owner_id=1)
     with pytest.raises(WatchlistEntryNotFoundError):
         await service.remove_from_watchlist(entry_id=999)

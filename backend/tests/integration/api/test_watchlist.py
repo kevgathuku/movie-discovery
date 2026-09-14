@@ -3,12 +3,28 @@ from datetime import date
 import pytest
 
 from app.models.movie import Movie, MovieSource
+from app.models.user import User, UserRole
 from app.models.watchlist import Watchlist, WatchlistEntry, WatchlistStatus
+from app.security.passwords import hash_password
 
 
 @pytest.fixture
-async def sample_watchlist(db_session):
-    watchlist = Watchlist(name="To Watch")
+async def sample_user(db_session):
+    # TEMPORARY (US3 rewrites with real auth): admin so the router's
+    # pre-auth shim resolves ownership to this fixture's data.
+    user = User(
+        email="owner@example.com",
+        password_hash=hash_password("password123"),
+        role=UserRole.admin,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
+
+
+@pytest.fixture
+async def sample_watchlist(db_session, sample_user):
+    watchlist = Watchlist(name="To Watch", owner_id=sample_user.id)
     db_session.add(watchlist)
     await db_session.commit()
     return watchlist
@@ -44,7 +60,7 @@ async def watchlist_with_entry(db_session, sample_watchlist, sample_movie):
 
 
 @pytest.mark.asyncio
-async def test_create_watchlist(client):
+async def test_create_watchlist(client, sample_user):
     response = await client.post(
         "/api/v1/watchlists",
         json={"name": "Upcoming"},
@@ -79,7 +95,7 @@ async def test_rename_watchlist(client, sample_watchlist):
 
 
 @pytest.mark.asyncio
-async def test_rename_watchlist_not_found(client):
+async def test_rename_watchlist_not_found(client, sample_user):
     response = await client.patch(
         "/api/v1/watchlists/99999",
         json={"name": "New Name"},
@@ -99,7 +115,7 @@ async def test_delete_watchlist(client, sample_watchlist):
 
 
 @pytest.mark.asyncio
-async def test_delete_watchlist_not_found(client):
+async def test_delete_watchlist_not_found(client, sample_user):
     response = await client.delete("/api/v1/watchlists/99999")
 
     assert response.status_code == 404
@@ -144,7 +160,7 @@ async def test_add_to_watchlist_movie_not_found(client, sample_watchlist):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_not_found(client, sample_movie):
+async def test_add_to_watchlist_not_found(client, sample_movie, sample_user):
     response = await client.post(
         "/api/v1/watchlists/99999/entries",
         json={"movie_id": sample_movie.id},
@@ -186,7 +202,7 @@ async def test_mark_watched(client, watchlist_with_entry):
 
 
 @pytest.mark.asyncio
-async def test_mark_watched_not_found(client):
+async def test_mark_watched_not_found(client, sample_user):
     response = await client.patch(
         "/api/v1/watchlists/1/entries/99999",
         json={"status": "watched"},

@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.dependencies import get_db
 from app.models.base import Base
+from app.models.user import User, UserRole
+from app.security.passwords import hash_password
 
 TEST_DB_URL = os.environ.get(
     "TEST_DATABASE_URL",
@@ -48,6 +50,20 @@ async def db_session():
         for table in reversed(Base.metadata.sorted_tables):
             await conn.execute(text(f"TRUNCATE TABLE {table.name} CASCADE"))
     await engine.dispose()
+
+
+@pytest.fixture
+async def admin_user(db_session):
+    # TEMPORARY pre-auth helper (US3 rewrites with real login): seeds the
+    # first admin so the watchlist router's owner shim resolves.
+    user = User(
+        email="admin@example.com",
+        password_hash=hash_password("password123"),
+        role=UserRole.admin,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    return user
 
 
 @pytest.fixture

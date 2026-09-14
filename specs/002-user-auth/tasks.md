@@ -18,9 +18,9 @@
 
 **Purpose**: Dependencies, configuration surface, decision record
 
-- [ ] T001 Add `pyjwt>=2.13`, `pwdlib[argon2]`, `slowapi` to `backend/pyproject.toml`, run `uv lock` + `uv sync --extra dev` on host, rebuild with `docker compose build api` (per `docs/decisions.md` uv-lock workflow; never `uv pip install` in containers)
-- [ ] T002 [P] Extend `backend/app/config.py` Settings with `JWT_SECRET_KEY` (required, no default — fail fast), `JWT_ALGORITHM="HS256"`, `ACCESS_TOKEN_EXPIRE_MINUTES=15`, `REFRESH_TOKEN_EXPIRE_DAYS=30`, `CORS_ORIGINS` (comma-separated, default empty)
-- [ ] T003 [P] Record reversal of 001 single-user/no-auth assumption + `pyjwt`/`pwdlib`/`slowapi` selections in `docs/decisions.md`, and file to MemPalace (`wing: movie_discovery, room: general`) per `AGENTS.md`
+- [X] T001 Add `pyjwt>=2.13`, `pwdlib[argon2]`, `slowapi` to `backend/pyproject.toml`, run `uv lock` + `uv sync --extra dev` on host, rebuild with `docker compose build api` (per `docs/decisions.md` uv-lock workflow; never `uv pip install` in containers)
+- [X] T002 [P] Extend `backend/app/config.py` Settings with `JWT_SECRET_KEY` (required, no default — fail fast), `JWT_ALGORITHM="HS256"`, `ACCESS_TOKEN_EXPIRE_MINUTES=15`, `REFRESH_TOKEN_EXPIRE_DAYS=30`, `CORS_ORIGINS` (comma-separated, default empty)
+- [X] T003 [P] Record reversal of 001 single-user/no-auth assumption + `pyjwt`/`pwdlib`/`slowapi` selections in `docs/decisions.md`, and file to MemPalace (`wing: movie_discovery, room: general`) per `AGENTS.md`
 
 ---
 
@@ -30,17 +30,17 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Add `UserAlreadyExistsError`, `InvalidCredentialsError`, `TokenRevokedError`, `NotAuthorizedError` to `backend/app/exceptions.py`
-- [ ] T005 [P] Create `backend/app/security/passwords.py` — `pwdlib` wrapper (`hash_password`, `verify_password`, Argon2id recommended defaults)
-- [ ] T006 [P] Create `backend/app/security/tokens.py` — `pyjwt` wrapper (`mint_access_token`, `decode_access_token` with pinned `algorithms=["HS256"]`, opaque `new_refresh_token` via `secrets`, `sha256_hash` for storage)
-- [ ] T007 [P] Create `backend/app/models/user.py` — `User` + `UserRole` (`user`/`admin`) per `data-model.md`
-- [ ] T008 [P] Create `backend/app/models/refresh_token.py` — `RefreshToken` (`jti`, `family_id`, `token_hash`, `expires_at`, `revoked_at`) per `data-model.md`
-- [ ] T009 [P] Create `backend/app/repositories/user_repo.py` — `get_by_email` (normalized), `get_by_id`, `create`
-- [ ] T010 [P] Create `backend/app/repositories/refresh_token_repo.py` — `store_hash`, `get_by_hash`, `revoke_jti`, `revoke_family`, `revoke_all_for_user`, `purge_expired`
-- [ ] T011 [P] Add `get_current_user` (Bearer decode → load user → `is_active` check) and `require_admin` (403 unless `role == admin`) to `backend/app/dependencies.py`
-- [ ] T012 Create Alembic revision A — `users` + `refresh_tokens` tables, `watchlists.owner_id` NULLABLE FK → `users.id` ON DELETE CASCADE (no backfill yet)
-- [ ] T013 [P] Create `backend/app/seed_admin.py` CLI — reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from env, creates first `role=admin` user, refuses if an admin exists (unless `--force`), never logs the password
-- [ ] T014 Create Alembic revision B (depends on T012 + seeded admin via T013 at deploy time) — backfill `watchlists.owner_id` to first admin, then `SET NOT NULL` + `ix_watchlists_owner_id` index; assert row count preserved (SC-006)
+- [X] T004 [P] Add `UserAlreadyExistsError`, `InvalidCredentialsError`, `TokenRevokedError`, `NotAuthorizedError` to `backend/app/exceptions.py`
+- [X] T005 [P] Create `backend/app/security/passwords.py` — `pwdlib` wrapper (`hash_password`, `verify_password`, Argon2id recommended defaults)
+- [X] T006 [P] Create `backend/app/security/tokens.py` — `pyjwt` wrapper (`mint_access_token`, `decode_access_token` with pinned `algorithms=["HS256"]`, opaque `new_refresh_token` via `secrets`, `sha256_hash` for storage)
+- [X] T007 [P] Create `backend/app/models/user.py` — `User` + `UserRole` (`user`/`admin`) per `data-model.md`
+- [X] T008 [P] Create `backend/app/models/refresh_token.py` — `RefreshToken` (`jti`, `family_id`, `token_hash`, `expires_at`, `revoked_at`) per `data-model.md`
+- [X] T009 [P] Create `backend/app/repositories/user_repo.py` — `get_by_email` (normalized), `get_by_id`, `create`
+- [X] T010 [P] Create `backend/app/repositories/refresh_token_repo.py` — `store_hash`, `get_by_hash`, `revoke_jti`, `revoke_family`, `revoke_all_for_user`, `purge_expired`
+- [X] T011 [P] Add `get_current_user` (Bearer decode → load user → `is_active` check) and `require_admin` (403 unless `role == admin`) to `backend/app/dependencies.py`
+- [X] T012 Create Alembic revision A — `users` + `refresh_tokens` tables, `watchlists.owner_id` NULLABLE FK → `users.id` ON DELETE CASCADE (no backfill yet)
+- [X] T013 [P] Create `backend/app/seed_admin.py` CLI — reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from env, creates first `role=admin` user, refuses if an admin exists (unless `--force`), never logs the password
+- [X] T014 Create Alembic revision B (depends on T012 + seeded admin via T013 at deploy time) — backfill `watchlists.owner_id` to first admin, then `SET NOT NULL` + `ix_watchlists_owner_id` index; assert row count preserved (SC-006)
 
 **Checkpoint**: Foundation ready — `users`/`refresh_tokens` tables, hashing/JWT helpers, `get_current_user`/`require_admin`, owner column with backfill path; user story implementation can now begin
 

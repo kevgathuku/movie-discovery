@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
@@ -8,6 +9,7 @@ from app.exceptions import (
     WatchlistEntryNotFoundError,
     WatchlistNotFoundError,
 )
+from app.models.user import User, UserRole
 from app.models.watchlist import WatchlistStatus
 from app.schemas.watchlist import (
     PaginatedWatchlistEntriesResponse,
@@ -25,11 +27,27 @@ from app.services.watchlist_service import WatchlistService
 router = APIRouter(tags=["watchlist"])
 
 
+async def _default_owner_id(db: AsyncSession) -> int:
+    # TEMPORARY pre-auth shim (removed in US3 T027, replaced by
+    # get_current_user): API watchlists belong to the first admin,
+    # mirroring the migration backfill rule.
+    result = await db.execute(
+        select(User.id).where(User.role == UserRole.admin).order_by(User.id).limit(1)
+    )
+    owner_id = result.scalar_one_or_none()
+    if owner_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No admin user bootstrapped yet",
+        )
+    return owner_id
+
+
 @router.get("/watchlists", response_model=WatchlistListResponse)
 async def list_watchlists(
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     watchlists = await service.list_watchlists()
     return WatchlistListResponse(
         watchlists=[WatchlistResponse.model_validate(w) for w in watchlists]
@@ -45,7 +63,7 @@ async def create_watchlist(
     request: WatchlistCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     watchlist = await service.create_watchlist(name=request.name)
     await db.commit()
     return WatchlistResponse.model_validate(watchlist)
@@ -57,7 +75,7 @@ async def rename_watchlist(
     request: WatchlistRename,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         watchlist = await service.rename_watchlist(watchlist_id, name=request.name)
         await db.commit()
@@ -74,7 +92,7 @@ async def delete_watchlist(
     watchlist_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         await service.delete_watchlist(watchlist_id)
         await db.commit()
@@ -98,7 +116,7 @@ async def list_watchlist_entries(
     per_page: int = 20,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         entries, total = await service.list_watchlist_entries(
             watchlist_id,
@@ -133,7 +151,7 @@ async def add_to_watchlist(
     request: WatchlistEntryCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         entry = await service.add_to_watchlist(watchlist_id, request.movie_id)
         await db.commit()
@@ -165,7 +183,7 @@ async def update_watchlist_entry(
     request: WatchlistEntryUpdate,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         entry = await service.mark_watched(entry_id)
         await db.commit()
@@ -186,7 +204,7 @@ async def delete_watchlist_entry(
     entry_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, await _default_owner_id(db))
     try:
         await service.remove_from_watchlist(entry_id)
         await db.commit()

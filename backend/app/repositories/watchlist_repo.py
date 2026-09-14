@@ -18,8 +18,8 @@ class WatchlistRepository:
     async def get_by_id(self, watchlist_id: int) -> Watchlist | None:
         return await self.session.get(Watchlist, watchlist_id)
 
-    async def create(self, name: str) -> Watchlist:
-        watchlist = Watchlist(name=name)
+    async def create(self, name: str, owner_id: int) -> Watchlist:
+        watchlist = Watchlist(name=name, owner_id=owner_id)
         self.session.add(watchlist)
         await self.session.flush()
         return watchlist
