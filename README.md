@@ -26,10 +26,16 @@ git clone <repo-url> && cd movie-discovery
 # Create environment file
 cat > .env <<EOF
 TMDB_API_KEY=your_tmdb_api_key_here
+JWT_SECRET_KEY=$(openssl rand -hex 32)
+CORS_ORIGINS=http://localhost:5173
 EOF
 
 # Start all services (migrations run automatically on startup)
 docker compose up -d
+
+# Bootstrap the first admin (required before first use)
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=change-me-now \
+  docker compose exec api uv run python -m app.seed_admin
 ```
 
 The API is available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
@@ -59,6 +65,9 @@ This fetches trending movies from TMDB into the local database. The scheduler al
 | `TMDB_API_KEY`  | Yes      | —                                                                 | TMDB API key      |
 | `DATABASE_URL`  | No       | `postgresql+asyncpg://postgres:postgres@localhost:5433/moviediscovery` | Database URL      |
 | `REDIS_URL`     | No       | `redis://localhost:6379/0`                                        | Redis/Celery broker |
+| `JWT_SECRET_KEY`| Yes      | — (min 32 chars; app fails fast without it)                       | JWT signing secret — never expose to clients |
+| `CORS_ORIGINS`  | No       | — (same-origin only)                                              | Comma-separated browser origins, e.g. `http://localhost:5173` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Bootstrap only | —                                        | First-admin credentials for `python -m app.seed_admin` |
 
 ## API Endpoints
 
@@ -100,7 +109,31 @@ This fetches trending movies from TMDB into the local database. The scheduler al
 
 | Method | Path              | Description       | Status |
 |--------|-------------------|-------------------|--------|
-| GET    | `/api/v1/jobs/{id}` | Get job status  | Stub   |
+| GET    | `/api/v1/jobs/{id}` | Get job status  | Removed (see Admin) |
+
+### Auth
+
+All clients (web SPA, mobile) use `Authorization: Bearer <access_token>`.
+Short-lived access token (15 min) + rotating refresh token (30 days).
+
+| Method | Path                        | Description                    | Status |
+|--------|-----------------------------|--------------------------------|--------|
+| POST   | `/api/v1/auth/register`     | Register (email + password)    | Implemented |
+| POST   | `/api/v1/auth/login`        | Login → token pair             | Implemented |
+| POST   | `/api/v1/auth/refresh`      | Rotate refresh token           | Implemented |
+| POST   | `/api/v1/auth/logout`       | Revoke one session             | Implemented |
+| POST   | `/api/v1/auth/logout-all`   | Revoke all sessions            | Implemented |
+| GET    | `/api/v1/auth/me`           | Current user                   | Implemented |
+
+Watchlists require authentication and are scoped to the owning user
+(cross-user access returns 404).
+
+### Admin (role `admin` only, hidden from `/docs`)
+
+| Method | Path                 | Description                    | Status |
+|--------|----------------------|--------------------------------|--------|
+| GET    | `/admin/jobs`        | Job history (filterable)       | Implemented |
+| GET    | `/admin/jobs/{id}`   | Job detail                     | Implemented |
 
 ## Data Model
 

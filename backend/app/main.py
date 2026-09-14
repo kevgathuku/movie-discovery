@@ -5,13 +5,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.clients.tmdb_client import TMDBClient
 from app.config import settings
 from app.exceptions import (
     ExternalAPIError,
+    InvalidCredentialsError,
+    JobNotFoundError,
     MovieAlreadyExistsError,
     MovieNotFoundError,
+    TokenRevokedError,
+    UserAlreadyExistsError,
     WatchlistDuplicateError,
     WatchlistEntryNotFoundError,
     WatchlistNotFoundError,
@@ -34,9 +40,14 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    cors_origins = [
+        origin.strip()
+        for origin in settings.CORS_ORIGINS.split(",")
+        if origin.strip()
+    ]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -101,7 +112,40 @@ def create_app() -> FastAPI:
             },
         )
 
-    from app.api.jobs import router as jobs_router
+    _domain_errors: dict[type[Exception], tuple[int, str]] = {
+        UserAlreadyExistsError: (
+            status.HTTP_409_CONFLICT,
+            "Email is already registered",
+        ),
+        InvalidCredentialsError: (
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid email or password",
+        ),
+        TokenRevokedError: (
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid or expired token",
+        ),
+    }
+
+    for exc_cls, (code, detail) in _domain_errors.items():
+        app.exception_handler(exc_cls)(
+            lambda request, exc, code=code, detail=detail: JSONResponse(
+                status_code=code, content={"detail": detail}
+            )
+        )
+
+    @app.exception_handler(JobNotFoundError)
+    async def job_not_found_handler(request: Request, exc: JobNotFoundError):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": str(exc)},
+        )
+
+    from app.api.admin_jobs import router as admin_jobs_router
+    from app.api.auth import limiter as auth_limiter
+    from app.api.auth import router as auth_router
+    app.state.limiter = auth_limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     from app.api.movies import router as movies_router
     from app.api.search import router as search_router
     from app.api.watchlist import router as watchlist_router
@@ -109,7 +153,8 @@ def create_app() -> FastAPI:
     app.include_router(movies_router, prefix="/api/v1")
     app.include_router(search_router, prefix="/api/v1")
     app.include_router(watchlist_router, prefix="/api/v1")
-    app.include_router(jobs_router, prefix="/api/v1")
+    app.include_router(auth_router, prefix="/api/v1")
+    app.include_router(admin_jobs_router)
 
     @app.get("/health")
     async def health() -> dict[str, str]:

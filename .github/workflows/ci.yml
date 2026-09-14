@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -32,8 +32,8 @@ jobs:
       TEST_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5433/moviediscovery_test
       ADMIN_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5433/postgres
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           enable-cache: true
           working-directory: backend
@@ -43,3 +43,22 @@ jobs:
         run: uv run ruff check .
       - name: Test
         run: uv run pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build

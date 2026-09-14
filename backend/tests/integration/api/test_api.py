@@ -36,9 +36,10 @@ async def test_search_empty_query(client):
     assert "suggestion" in data
 
 
-async def test_list_watchlists_response_shape(client):
+async def test_list_watchlists_response_shape(client, make_user_headers):
     """Watchlists response must contain the list envelope."""
-    response = await client.get("/api/v1/watchlists")
+    headers = await make_user_headers("owner@example.com")
+    response = await client.get("/api/v1/watchlists", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert "watchlists" in data
@@ -46,7 +47,6 @@ async def test_list_watchlists_response_shape(client):
 
 
 async def test_get_job_not_found(client):
+    # Public jobs stub removed in 002-user-auth US4; jobs live under /admin.
     response = await client.get("/api/v1/jobs/nonexistent")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["detail"] == "Not implemented yet"
+    assert response.status_code == 404

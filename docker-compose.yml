@@ -36,6 +36,8 @@ services:
       TMDB_API_KEY: ${TMDB_API_KEY}
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/moviediscovery
       REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,6 +55,7 @@ services:
       TMDB_API_KEY: ${TMDB_API_KEY}
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/moviediscovery
       REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,6 +73,7 @@ services:
       TMDB_API_KEY: ${TMDB_API_KEY}
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/moviediscovery
       REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy

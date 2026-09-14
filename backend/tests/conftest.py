@@ -1,15 +1,42 @@
 import os
 
+
+def _load_repo_env():
+    # Host runs need localhost:5433 URLs from the repo-root .env (the
+    # defaults below only resolve inside Docker). Explicit env wins.
+    if "TEST_DATABASE_URL" in os.environ and "ADMIN_DATABASE_URL" in os.environ:
+        return
+    env_file = os.path.join(
+        os.path.dirname(__file__), "..", "..", ".env"
+    )
+    try:
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+    except OSError:
+        pass
+
+
+_load_repo_env()
+
 os.environ.setdefault("TMDB_API_KEY", "test-api-key")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest-only-32c")
 
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+import pytest  # noqa: E402 (imports must follow env setup above)
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
-from app.dependencies import get_db
-from app.models.base import Base
+from app.dependencies import get_db  # noqa: E402
+from app.models.base import Base  # noqa: E402
 
 TEST_DB_URL = os.environ.get(
     "TEST_DATABASE_URL",
@@ -47,6 +74,48 @@ async def db_session():
         for table in reversed(Base.metadata.sorted_tables):
             await conn.execute(text(f"TRUNCATE TABLE {table.name} CASCADE"))
     await engine.dispose()
+
+
+@pytest.fixture
+async def session_factory():
+    """Independent session factory on the test DB (concurrency tests)."""
+    engine = create_async_engine(TEST_DB_URL)
+    factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    yield factory
+    await engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    # slowapi buckets are process-global; reset per test so login/register
+    # limits don't leak across tests (limits still enforced within a test).
+    from app.api.auth import limiter
+
+    limiter.reset()
+
+
+@pytest.fixture
+def make_user_headers(client):
+    """Register+login through the real API; return Authorization headers."""
+
+    async def _make(email: str, password: str = "password123"):
+        register = await client.post(
+            "/api/v1/auth/register",
+            json={"email": email, "password": password},
+        )
+        assert register.status_code == 201
+        login = await client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password},
+        )
+        assert login.status_code == 200
+        return {
+            "Authorization": f"Bearer {login.json()['access_token']}"
+        }
+
+    return _make
 
 
 @pytest.fixture

@@ -1,17 +1,9 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './App.jsx';
 
-function App() {
-  return (
-    <div style={{ fontFamily: 'sans-serif', textAlign: 'center', marginTop: '50px' }}>
-      <h1>Movie Explorer</h1>
-      <p>Frontend placeholder skeleton</p>
-    </div>
-  )
-}
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
   </StrictMode>,
-)
+);

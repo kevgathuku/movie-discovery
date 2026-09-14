@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db
+from app.dependencies import get_current_user, get_db
 from app.exceptions import (
     MovieNotFoundError,
     WatchlistDuplicateError,
     WatchlistEntryNotFoundError,
     WatchlistNotFoundError,
 )
+from app.models.user import User
 from app.models.watchlist import WatchlistStatus
 from app.schemas.watchlist import (
     PaginatedWatchlistEntriesResponse,
@@ -28,8 +29,9 @@ router = APIRouter(tags=["watchlist"])
 @router.get("/watchlists", response_model=WatchlistListResponse)
 async def list_watchlists(
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     watchlists = await service.list_watchlists()
     return WatchlistListResponse(
         watchlists=[WatchlistResponse.model_validate(w) for w in watchlists]
@@ -44,8 +46,9 @@ async def list_watchlists(
 async def create_watchlist(
     request: WatchlistCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     watchlist = await service.create_watchlist(name=request.name)
     await db.commit()
     return WatchlistResponse.model_validate(watchlist)
@@ -56,8 +59,9 @@ async def rename_watchlist(
     watchlist_id: int,
     request: WatchlistRename,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         watchlist = await service.rename_watchlist(watchlist_id, name=request.name)
         await db.commit()
@@ -73,8 +77,9 @@ async def rename_watchlist(
 async def delete_watchlist(
     watchlist_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         await service.delete_watchlist(watchlist_id)
         await db.commit()
@@ -97,8 +102,9 @@ async def list_watchlist_entries(
     page: int = 1,
     per_page: int = 20,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         entries, total = await service.list_watchlist_entries(
             watchlist_id,
@@ -132,8 +138,9 @@ async def add_to_watchlist(
     watchlist_id: int,
     request: WatchlistEntryCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         entry = await service.add_to_watchlist(watchlist_id, request.movie_id)
         await db.commit()
@@ -164,8 +171,9 @@ async def update_watchlist_entry(
     entry_id: int,
     request: WatchlistEntryUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         entry = await service.mark_watched(entry_id)
         await db.commit()
@@ -185,8 +193,9 @@ async def delete_watchlist_entry(
     watchlist_id: int,
     entry_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    service = WatchlistService(db)
+    service = WatchlistService(db, current_user.id)
     try:
         await service.remove_from_watchlist(entry_id)
         await db.commit()

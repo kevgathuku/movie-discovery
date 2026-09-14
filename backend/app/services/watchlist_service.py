@@ -18,24 +18,30 @@ logger = logging.getLogger(__name__)
 
 
 class WatchlistService:
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, owner_id: int) -> None:
         self.db = db
+        self.owner_id = owner_id
         self.movie_repo = MovieRepository(db)
 
     async def create_watchlist(self, name: str) -> Watchlist:
-        watchlist = Watchlist(name=name)
+        watchlist = Watchlist(name=name, owner_id=self.owner_id)
         self.db.add(watchlist)
         await self.db.flush()
         logger.info("Created watchlist: %s", name)
         return watchlist
 
     async def list_watchlists(self) -> list[Watchlist]:
-        result = await self.db.execute(select(Watchlist))
+        result = await self.db.execute(
+            select(Watchlist).where(Watchlist.owner_id == self.owner_id)
+        )
         return list(result.scalars().all())
 
     async def get_watchlist(self, watchlist_id: int) -> Watchlist:
         result = await self.db.execute(
-            select(Watchlist).where(Watchlist.id == watchlist_id)
+            select(Watchlist).where(
+                Watchlist.id == watchlist_id,
+                Watchlist.owner_id == self.owner_id,
+            )
         )
         watchlist = result.scalar_one_or_none()
         if not watchlist:
@@ -123,13 +129,22 @@ class WatchlistService:
 
         return entries, total
 
-    async def mark_watched(self, entry_id: int) -> WatchlistEntry:
+    async def _get_entry(self, entry_id: int) -> WatchlistEntry:
         result = await self.db.execute(
-            select(WatchlistEntry).where(WatchlistEntry.id == entry_id)
+            select(WatchlistEntry)
+            .join(Watchlist, Watchlist.id == WatchlistEntry.watchlist_id)
+            .where(
+                WatchlistEntry.id == entry_id,
+                Watchlist.owner_id == self.owner_id,
+            )
         )
         entry = result.scalar_one_or_none()
         if not entry:
             raise WatchlistEntryNotFoundError(entry_id)
+        return entry
+
+    async def mark_watched(self, entry_id: int) -> WatchlistEntry:
+        entry = await self._get_entry(entry_id)
 
         entry.status = WatchlistStatus.watched
         entry.watched_at = datetime.now(UTC)
@@ -138,12 +153,7 @@ class WatchlistService:
         return entry
 
     async def remove_from_watchlist(self, entry_id: int) -> None:
-        result = await self.db.execute(
-            select(WatchlistEntry).where(WatchlistEntry.id == entry_id)
-        )
-        entry = result.scalar_one_or_none()
-        if not entry:
-            raise WatchlistEntryNotFoundError(entry_id)
+        entry = await self._get_entry(entry_id)
 
         await self.db.delete(entry)
         await self.db.flush()
