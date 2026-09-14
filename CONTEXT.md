@@ -34,6 +34,10 @@ _Avoid_: poster_path (TMDB's payload key — expand it on intake)
 Where a catalog row came from: `manual` or `sync`.
 _Avoid_: origin, provider
 
+**Genre**:
+A TMDB genre cached locally by TMDB id; the id→name map used to label movies on intake.
+_Avoid_: genre_id (as a stored movie attribute — movies store names)
+
 ### Library
 
 **Watchlist**:
