@@ -1,15 +1,8 @@
 import { BrowserRouter, Link, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
-import { RequireAdmin } from './components/RequireAuth.jsx';
+import { RequireAdmin, RequireAuth } from './components/RequireAuth.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AdminJobs } from './pages/AdminJobs.jsx';
 import { Login } from './pages/Login.jsx';
-
-function Protected({ children }) {
-  const { user, ready } = useAuth();
-  if (!ready) return <p>Loading…</p>;
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-}
 
 function LoginRoute() {
   const { user, ready } = useAuth();
@@ -53,9 +46,9 @@ export function AppRoutes() {
       <Route
         path="/"
         element={
-          <Protected>
+          <RequireAuth fallback={<Navigate to="/login" replace />}>
             <Shell />
-          </Protected>
+          </RequireAuth>
         }
       >
         <Route

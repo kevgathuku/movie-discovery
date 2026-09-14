@@ -56,8 +56,3 @@ class InvalidCredentialsError(Exception):
 class TokenRevokedError(Exception):
     def __init__(self) -> None:
         super().__init__("Token has been revoked or expired")
-
-
-class NotAuthorizedError(Exception):
-    def __init__(self) -> None:
-        super().__init__("Not authorized")

@@ -63,8 +63,9 @@ async def login(
     body: UserLoginRequest,
     db: AsyncSession = Depends(get_db),
 ):
+    service = AuthService(db)
     try:
-        user = await AuthService(db).authenticate(
+        user = await service.authenticate(
             email=str(body.email), password=body.password
         )
     except InvalidCredentialsError as e:
@@ -72,7 +73,7 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         ) from e
-    access, refresh = await AuthService(db).issue_pair(user)
+    access, refresh = await service.issue_pair(user)
     await db.commit()
     return _token_pair(access, refresh)
 

@@ -112,29 +112,26 @@ def create_app() -> FastAPI:
             },
         )
 
-    @app.exception_handler(UserAlreadyExistsError)
-    async def user_already_exists_handler(
-        request: Request, exc: UserAlreadyExistsError
-    ):
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={"detail": "Email is already registered"},
-        )
+    _domain_errors: dict[type[Exception], tuple[int, str]] = {
+        UserAlreadyExistsError: (
+            status.HTTP_409_CONFLICT,
+            "Email is already registered",
+        ),
+        InvalidCredentialsError: (
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid email or password",
+        ),
+        TokenRevokedError: (
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid or expired token",
+        ),
+    }
 
-    @app.exception_handler(InvalidCredentialsError)
-    async def invalid_credentials_handler(
-        request: Request, exc: InvalidCredentialsError
-    ):
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"detail": "Invalid email or password"},
-        )
-
-    @app.exception_handler(TokenRevokedError)
-    async def token_revoked_handler(request: Request, exc: TokenRevokedError):
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"detail": "Invalid or expired token"},
+    for exc_cls, (code, detail) in _domain_errors.items():
+        app.exception_handler(exc_cls)(
+            lambda request, exc, code=code, detail=detail: JSONResponse(
+                status_code=code, content={"detail": detail}
+            )
         )
 
     @app.exception_handler(JobNotFoundError)
