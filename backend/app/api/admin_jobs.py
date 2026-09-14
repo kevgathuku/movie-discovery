@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db, require_admin
 from app.exceptions import JobNotFoundError
-from app.models.job import Job, JobStatus
+from app.models.job import JobStatus
 from app.repositories.job_repo import JobRepository
 from app.schemas.job import JobResponse
 
@@ -33,21 +32,8 @@ async def list_jobs(
     db: AsyncSession = Depends(get_db),
 ):
     per_page = min(max(per_page, 1), 100)
-    query = select(Job).order_by(Job.created_at.desc())
-    if status is not None:
-        query = query.where(Job.status == status)
-    if job_type is not None:
-        query = query.where(Job.job_type == job_type)
-
-    total = (
-        await db.execute(
-            select(func.count()).select_from(query.subquery())
-        )
-    ).scalar() or 0
-    jobs = list(
-        (
-            await db.execute(query.offset((page - 1) * per_page).limit(per_page))
-        ).scalars().all()
+    jobs, total = await JobRepository(db).list(
+        status=status, job_type=job_type, page=page, per_page=per_page
     )
     return AdminJobListResponse(
         jobs=[JobResponse.model_validate(j) for j in jobs],
