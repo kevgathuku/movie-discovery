@@ -12,7 +12,13 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': 'http://localhost:8000',
-      '/admin': 'http://localhost:8000',
+      // ponytail: same /admin prefix serves the SPA route (/admin) and the
+      // backend API (/admin/jobs). Browser navigations send Accept: text/html
+      // so they fall through to index.html; fetch() API calls get proxied.
+      '/admin': {
+        target: 'http://localhost:8000',
+        bypass: (req) => (req.headers.accept?.includes('text/html') ? '/index.html' : undefined),
+      },
     },
   },
 });
